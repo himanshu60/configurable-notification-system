@@ -1,0 +1,39 @@
+{
+  "name": "configurable-notification-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Configurable notification system - define when and how notifications are delivered",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "postinstall": "npm run build -w @cns/shared",
+    "dev": "concurrently -n shared,api,web -c cyan,magenta,green \"npm:dev:shared\" \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:shared": "npm run dev -w @cns/shared",
+    "dev:api": "npm run dev -w @cns/api",
+    "dev:web": "npm run start -w @cns/web",
+    "build": "npm run build -w @cns/shared && npm run build -w @cns/api && npm run build -w @cns/web",
+    "test": "npm run test -w @cns/shared --if-present && npm run test -w @cns/api && npm run test -w @cns/web",
+    "test:api": "npm run test -w @cns/api",
+    "test:web": "npm run test -w @cns/web",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck -w @cns/shared && npm run typecheck -w @cns/api && npm run typecheck -w @cns/web",
+    "seed": "npm run seed -w @cns/api"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.5",
+    "eslint": "^10.9.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.68.0"
+  }
+}
