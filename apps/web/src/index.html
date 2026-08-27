@@ -42,25 +42,6 @@
       }
     </style>
 
-    <script>
-      // Reveals the ligature icons only once the icon font is usable. A 4s
-      // ceiling means a blocked font host degrades to plain text rather than
-      // leaving the UI permanently icon-less.
-      (function () {
-        var reveal = function () {
-          document.documentElement.classList.add('icons-ready');
-        };
-        if (document.fonts && document.fonts.load) {
-          document.fonts
-            .load('20px "Material Symbols Outlined"')
-            .then(reveal)
-            .catch(reveal);
-          setTimeout(reveal, 4000);
-        } else {
-          reveal();
-        }
-      })();
-    </script>
   </head>
   <body>
     <app-root></app-root>

@@ -152,19 +152,10 @@ mat-icon {
 }
 
 /**
- * Ligature icons render as their literal text ("menu", "search") until the font
- * arrives. On a slow connection, or if Google Fonts is unreachable entirely,
- * that turns the whole UI into scattered words. Icons stay transparent until
- * `document.fonts.ready` resolves, so the layout is stable and the fallback is
- * empty space rather than garbled text.
+ * `font-display: block` on the self-hosted face gives an invisible period
+ * rather than flashing the raw ligature text ("menu", "search") before the
+ * font arrives. No script needed, so this survives a strict CSP.
  */
-.material-symbols-outlined {
-  color: transparent;
-}
-
-html.icons-ready .material-symbols-outlined {
-  color: inherit;
-}
 
 // ---------------------------------------------------------------------------
 // Page scaffolding, kept global so every feature lays out identically.
