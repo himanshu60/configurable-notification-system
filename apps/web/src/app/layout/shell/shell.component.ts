@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   inject,
+  computed,
   signal,
   type OnInit,
 } from '@angular/core';
@@ -70,13 +71,23 @@ export class ShellComponent implements OnInit {
   protected readonly notifications = inject(NotificationsService);
 
   protected readonly navItems = NAV_ITEMS;
-  protected readonly drawerOpen = signal(true);
 
   protected readonly isHandset = toSignal(
     this.breakpoints
       .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
       .pipe(map((result) => result.matches)),
     { initialValue: false },
+  );
+
+  /**
+   * Desktop and handset keep separate drawer state. Sharing one flag meant the
+   * drawer inherited "open" when the viewport narrowed and covered the page.
+   */
+  private readonly desktopOpen = signal(true);
+  private readonly handsetOpen = signal(false);
+
+  protected readonly drawerOpen = computed(() =>
+    this.isHandset() ? this.handsetOpen() : this.desktopOpen(),
   );
 
   ngOnInit(): void {
@@ -95,11 +106,18 @@ export class ShellComponent implements OnInit {
   }
 
   protected toggleDrawer(): void {
-    this.drawerOpen.update((open) => !open);
+    const target = this.isHandset() ? this.handsetOpen : this.desktopOpen;
+    target.update((open) => !open);
   }
 
+  /** The overlay drawer must close after navigation, or it hides the page. */
   protected closeOnHandset(): void {
-    if (this.isHandset()) this.drawerOpen.set(false);
+    if (this.isHandset()) this.handsetOpen.set(false);
+  }
+
+  protected onDrawerClosed(): void {
+    if (this.isHandset()) this.handsetOpen.set(false);
+    else this.desktopOpen.set(false);
   }
 
   protected signOut(): void {

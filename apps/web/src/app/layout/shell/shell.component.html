@@ -2,8 +2,8 @@
   <mat-sidenav
     class="drawer"
     [mode]="isHandset() ? 'over' : 'side'"
-    [opened]="isHandset() ? drawerOpen() && isHandset() : drawerOpen()"
-    (closedStart)="drawerOpen.set(false)"
+    [opened]="drawerOpen()"
+    (closedStart)="onDrawerClosed()"
   >
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">

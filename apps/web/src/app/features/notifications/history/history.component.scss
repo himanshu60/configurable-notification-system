@@ -6,8 +6,14 @@
 }
 
 .history-shell {
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 60px);
   background: transparent;
+}
+
+// Same reasoning as the app shell: without this the min-width table below
+// widens the page instead of scrolling inside its own container.
+.history-shell > mat-sidenav-content {
+  min-width: 0;
 }
 
 .filters {

@@ -213,8 +213,19 @@
   }
 }
 
+/**
+ * `mat-sidenav-content` is a flex item and will happily grow to fit a wide
+ * child, which lets a min-width table drag the whole page sideways. `min-width:
+ * 0` makes it respect the viewport so `.table-scroll` scrolls internally instead.
+ */
+mat-sidenav-content {
+  min-width: 0;
+}
+
 main {
   min-height: calc(100vh - 60px);
+  min-width: 0;
+  overflow-x: clip;
 }
 
 @media (max-width: $breakpoint-sm) {
