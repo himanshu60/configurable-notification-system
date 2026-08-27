@@ -1,0 +1,66 @@
+# Render blueprint. From the dashboard: New > Blueprint, point it at this repo.
+#
+# Two services: the API as a web service, the Angular build as a static site.
+# The static site rewrites /api/* to the API, so the browser only ever talks to
+# one origin - no CORS, and no API URL baked into the bundle.
+services:
+  - type: web
+    name: cns-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    # The whole workspace is installed so @cns/shared is built and linked.
+    buildCommand: npm ci && npm run build -w @cns/shared && npm run build -w @cns/api
+    startCommand: node apps/api/dist/server.js
+    healthCheckPath: /health/ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      # Set this in the dashboard to a MongoDB Atlas connection string.
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      - key: BCRYPT_ROUNDS
+        value: '12'
+      # Requests arrive same-origin via the static site rewrite, so this only
+      # needs to cover direct API calls (curl, Postman, another client).
+      - key: CORS_ORIGINS
+        fromService:
+          type: web
+          name: cns-web
+          property: host
+      - key: WORKER_ENABLED
+        value: 'true'
+      - key: WORKER_ID
+        value: render-api-1
+      - key: DELIVERY_MAX_ATTEMPTS
+        value: '4'
+      - key: MOCK_EMAIL_FAILURE_RATE
+        value: '0'
+
+  - type: web
+    name: cns-web
+    runtime: static
+    plan: free
+    branch: main
+    buildCommand: npm ci && npm run build -w @cns/shared && npm run build -w @cns/web
+    staticPublishPath: apps/web/dist/web/browser
+    routes:
+      # API calls are proxied to the backend service on the same origin.
+      - type: rewrite
+        source: /api/*
+        destination: https://cns-api.onrender.com/api/*
+      # Angular owns routing, so every other path serves index.html.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /fonts/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
