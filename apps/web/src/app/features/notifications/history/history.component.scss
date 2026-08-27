@@ -1,0 +1,187 @@
+@use '../../../../styles/tokens' as *;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.history-shell {
+  min-height: calc(100vh - 60px);
+  background: transparent;
+}
+
+// Same reasoning as the app shell: without this the min-width table below
+// widens the page instead of scrolling inside its own container.
+.history-shell > mat-sidenav-content {
+  min-width: 0;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  margin-bottom: $space-4;
+}
+
+.search {
+  flex: 1 1 260px;
+  min-width: 200px;
+}
+
+.filters mat-form-field:not(.search) {
+  width: 180px;
+}
+
+.loader {
+  margin-bottom: $space-3;
+}
+
+.history-table {
+  width: 100%;
+  min-width: 780px;
+  background: transparent;
+}
+
+.subject {
+  font-weight: 500;
+}
+
+.rule-name {
+  font-size: 0.76rem;
+}
+
+.channel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+
+  mat-icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.attempts {
+  display: block;
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
+
+.clickable {
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--mat-sys-surface-container-high);
+  }
+}
+
+mat-paginator {
+  margin-top: $space-3;
+  background: transparent;
+}
+
+mat-sidenav {
+  width: min(460px, 100vw);
+  border-left: 1px solid var(--mat-sys-outline-variant);
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  padding: $space-4;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: $space-2 $space-3;
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  dt {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.error-box {
+  display: flex;
+  gap: $space-2;
+  padding: $space-3;
+  border-radius: $radius-md;
+  background: color-mix(in srgb, var(--mat-sys-error) 10%, transparent);
+  color: var(--mat-sys-error);
+  font-size: 0.82rem;
+
+  mat-icon {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  padding-top: $space-4;
+
+  h3 {
+    margin: 0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  pre {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: $font-mono;
+    font-size: 0.78rem;
+    padding: $space-3;
+    border-radius: $radius-sm;
+    background: var(--mat-sys-surface-container-high);
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .filters mat-form-field:not(.search) {
+    width: 100%;
+  }
+
+  .detail dl {
+    grid-template-columns: 1fr;
+    gap: 2px $space-3;
+  }
+
+  .detail dt {
+    margin-top: $space-2;
+  }
+}

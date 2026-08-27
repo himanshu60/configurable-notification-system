@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Notify - Configurable Notification System</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Define when and how you are notified: rules, conditions, channels and delivery history."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="favicon.ico" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <!-- The icon font is self-hosted (see styles.scss); preload it so icons are
+         painted with the first frame rather than after a round trip. -->
+    <link
+      rel="preload"
+      href="/fonts/material-symbols.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <style>
+      /* Paint the page background before Angular boots so a slow first load
+         does not flash white in dark mode. */
+      html {
+        background: #f5f6fa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        html:not(.light) {
+          background: #0b0d14;
+        }
+      }
+    </style>
+
+    <script>
+      // Reveals the ligature icons only once the icon font is usable. A 4s
+      // ceiling means a blocked font host degrades to plain text rather than
+      // leaving the UI permanently icon-less.
+      (function () {
+        var reveal = function () {
+          document.documentElement.classList.add('icons-ready');
+        };
+        if (document.fonts && document.fonts.load) {
+          document.fonts
+            .load('20px "Material Symbols Outlined"')
+            .then(reveal)
+            .catch(reveal);
+          setTimeout(reveal, 4000);
+        } else {
+          reveal();
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<div class="page">
+  <cns-page-header
+    title="Inbox"
+    [subtitle]="
+      unread() > 0
+        ? unread() + ' unread notification(s) addressed to you.'
+        : 'Notifications delivered to you on the in-app channel.'
+    "
+  >
+    <button matButton (click)="toggleFilter()">
+      <mat-icon>{{ unreadOnly() ? 'filter_alt_off' : 'filter_alt' }}</mat-icon>
+      {{ unreadOnly() ? 'Show all' : 'Unread only' }}
+    </button>
+    <button matButton="filled" (click)="markAllRead()" [disabled]="unread() === 0">
+      <mat-icon>done_all</mat-icon>
+      Mark all read
+    </button>
+  </cns-page-header>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" class="loader" />
+  }
+
+  @if (!loading() && items().length === 0) {
+    <div class="surface-card">
+      <cns-empty-state
+        icon="notifications_off"
+        [title]="unreadOnly() ? 'Nothing unread' : 'Your inbox is empty'"
+        message="In-app notifications addressed to your account will appear here."
+      />
+    </div>
+  } @else {
+    <div class="list">
+      @for (item of items(); track item.id) {
+        <mat-card
+          appearance="outlined"
+          class="item"
+          [class.unread]="!item.readAt"
+          tabindex="0"
+          (click)="toggle(item)"
+          (keydown.enter)="toggle(item)"
+        >
+          <div class="item-head">
+            @if (!item.readAt) {
+              <span class="dot" aria-label="Unread"></span>
+            }
+            <div class="item-title">
+              <strong>{{ item.subject }}</strong>
+              <span class="text-muted">{{ item.ruleName }}</span>
+            </div>
+            <span class="text-muted time" [matTooltip]="item.createdAt">
+              {{ item.createdAt | date: 'MMM d, HH:mm' }}
+            </span>
+          </div>
+
+          @if (expanded() === item.id) {
+            <pre class="body">{{ item.body }}</pre>
+          }
+        </mat-card>
+      }
+    </div>
+  }
+</div>

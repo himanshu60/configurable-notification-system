@@ -1,0 +1,104 @@
+<div class="page">
+  <cns-page-header
+    [title]="'Welcome back, ' + firstName()"
+    subtitle="How your notification rules are performing right now."
+  >
+    <a matButton routerLink="/simulator">
+      <mat-icon>bolt</mat-icon>
+      Fire a test event
+    </a>
+    <a matButton="filled" routerLink="/rules/new">
+      <mat-icon>add</mat-icon>
+      New rule
+    </a>
+  </cns-page-header>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" class="loader" />
+  }
+
+  @if (stats(); as stats) {
+    <div class="tiles">
+      <mat-card appearance="outlined" class="tile">
+        <span class="tile-label">Active rules</span>
+        <span class="tile-value">{{ stats.rules.enabled }}</span>
+        <span class="tile-foot text-muted">of {{ stats.rules.total }} total</span>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="tile">
+        <span class="tile-label">Events received</span>
+        <span class="tile-value">{{ stats.events.total }}</span>
+        <span class="tile-foot text-muted">{{ stats.events.last24h }} in the last 24h</span>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="tile">
+        <span class="tile-label">Delivered</span>
+        <span class="tile-value">{{ stats.totals.SENT }}</span>
+        <span class="tile-foot text-muted">{{ stats.deliverySuccessRate }}% success rate</span>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="tile" [class.alert]="stats.totals.DEAD_LETTER > 0">
+        <span class="tile-label">Dead lettered</span>
+        <span class="tile-value">{{ stats.totals.DEAD_LETTER }}</span>
+        <span class="tile-foot text-muted">{{ inFlight() }} still in flight</span>
+      </mat-card>
+    </div>
+
+    <div class="panels">
+      <mat-card appearance="outlined" class="panel">
+        <h2>By channel</h2>
+
+        @for (channel of stats.byChannel; track channel.channel) {
+          <div class="channel-row">
+            <div class="channel-name">
+              <mat-icon>{{ channel.channel === 'EMAIL' ? 'mail' : 'notifications' }}</mat-icon>
+              {{ channelLabels[channel.channel] }}
+            </div>
+
+            <div class="bar">
+              @if (channel.sent + channel.failed + channel.pending > 0) {
+                <span class="seg sent" [style.flex]="channel.sent"></span>
+                <span class="seg pending" [style.flex]="channel.pending"></span>
+                <span class="seg failed" [style.flex]="channel.failed"></span>
+              } @else {
+                <span class="seg empty" [style.flex]="1"></span>
+              }
+            </div>
+
+            <div class="channel-counts text-muted">
+              {{ channel.sent }} sent · {{ channel.pending }} in flight · {{ channel.failed }} failed
+            </div>
+          </div>
+        }
+      </mat-card>
+
+      <mat-card appearance="outlined" class="panel">
+        <div class="panel-head">
+          <h2>Recent activity</h2>
+          <a matButton routerLink="/history">View all</a>
+        </div>
+
+        @if (recent().length === 0) {
+          <cns-empty-state
+            icon="history"
+            title="Nothing yet"
+            message="Fire an event from the simulator to see notifications here."
+          />
+        } @else {
+          <ul class="activity">
+            @for (item of recent(); track item.id) {
+              <li>
+                <div class="activity-main">
+                  <strong class="truncate">{{ item.subject }}</strong>
+                  <span class="text-muted truncate">{{ item.recipient.value }}</span>
+                </div>
+                <cns-status-chip [status]="item.status" />
+                <span class="text-muted time">{{ item.createdAt | date: 'HH:mm' }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </mat-card>
+    </div>
+  }
+</div>

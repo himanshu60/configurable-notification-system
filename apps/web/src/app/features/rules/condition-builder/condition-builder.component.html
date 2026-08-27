@@ -1,0 +1,156 @@
+<div class="builder" [formGroup]="group()">
+  <div class="builder-head">
+    <div>
+      <h3>Conditions</h3>
+      <p class="text-muted">
+        @if (items.length === 0) {
+          No conditions yet, so this rule matches every
+          {{ catalog.eventType(eventType())?.label?.toLowerCase() ?? 'event' }}.
+        } @else {
+          Notify when
+          {{ group().controls.logic.value === 'AND' ? 'all' : 'any' }}
+          of the following are true.
+        }
+      </p>
+    </div>
+
+    @if (items.length > 1) {
+      <mat-button-toggle-group formControlName="logic" aria-label="Match logic" hideSingleSelectionIndicator>
+        <mat-button-toggle value="AND">Match all</mat-button-toggle>
+        <mat-button-toggle value="OR">Match any</mat-button-toggle>
+      </mat-button-toggle-group>
+    }
+  </div>
+
+  <div class="rows" formArrayName="items">
+    @for (row of items.controls; track $index; let i = $index, first = $first) {
+      <div class="condition-row" [formGroupName]="i">
+        <span class="joiner text-muted">
+          {{ first ? 'When' : group().controls.logic.value === 'OR' ? 'or' : 'and' }}
+        </span>
+
+        <mat-form-field class="field" subscriptSizing="dynamic">
+          <mat-label>Field</mat-label>
+          <mat-select formControlName="field" (valueChange)="onFieldChanged(row)">
+            <mat-select-trigger>{{ fieldFor(row)?.label }}</mat-select-trigger>
+            @for (field of fields(); track field.path) {
+              <mat-option [value]="field.path">
+                {{ field.label }}
+                <span class="option-path">{{ field.path }}</span>
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="operator" subscriptSizing="dynamic">
+          <mat-label>Condition</mat-label>
+          <mat-select formControlName="operator" (valueChange)="onOperatorChanged(row)">
+            @for (operator of operators(row); track operator.value) {
+              <mat-option [value]="operator.value">{{ operator.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        @switch (valueKind(row)) {
+          @case ('none') {
+            <span class="value-placeholder text-muted">No value needed</span>
+          }
+          @case ('number') {
+            <mat-form-field class="value" subscriptSizing="dynamic">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" />
+              @if (fieldFor(row)?.format === 'currency') {
+                <span matTextPrefix>$&nbsp;</span>
+              }
+            </mat-form-field>
+          }
+          @case ('boolean') {
+            <mat-form-field class="value" subscriptSizing="dynamic">
+              <mat-label>Value</mat-label>
+              <mat-select formControlName="value">
+                <mat-option [value]="true">True</mat-option>
+                <mat-option [value]="false">False</mat-option>
+              </mat-select>
+            </mat-form-field>
+          }
+          @case ('date') {
+            <mat-form-field class="value" subscriptSizing="dynamic">
+              <mat-label>Date</mat-label>
+              <input matInput type="date" formControlName="value" />
+            </mat-form-field>
+          }
+          @case ('select') {
+            <mat-form-field class="value" subscriptSizing="dynamic">
+              <mat-label>Value</mat-label>
+              <mat-select formControlName="value">
+                @for (option of options(row); track option) {
+                  <mat-option [value]="option">{{ option }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+          @case ('multi') {
+            <mat-form-field class="value" subscriptSizing="dynamic">
+              <mat-label>Values</mat-label>
+              <mat-select formControlName="value" multiple>
+                @for (option of options(row); track option) {
+                  <mat-option [value]="option">{{ option }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+          @case ('range') {
+            <div class="range">
+              <mat-form-field subscriptSizing="dynamic">
+                <mat-label>From</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [value]="rangeAt(row, 0)"
+                  (input)="onRangeChanged(row, 0, $any($event.target).value)"
+                />
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic">
+                <mat-label>To</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  [value]="rangeAt(row, 1)"
+                  (input)="onRangeChanged(row, 1, $any($event.target).value)"
+                />
+              </mat-form-field>
+            </div>
+          }
+          @default {
+            <mat-form-field class="value" subscriptSizing="dynamic">
+              <mat-label>{{ valueKind(row) === 'text' ? 'Value' : 'Values' }}</mat-label>
+              <input
+                matInput
+                [value]="listAsText(row) || $any(row.controls.value.value) || ''"
+                (input)="onListText(row, $any($event.target).value)"
+                placeholder="Comma separated"
+              />
+              <mat-hint>Separate multiple values with commas</mat-hint>
+            </mat-form-field>
+          }
+        }
+
+        <button
+          matIconButton
+          type="button"
+          class="remove"
+          (click)="removeCondition(i)"
+          matTooltip="Remove condition"
+          [attr.aria-label]="'Remove condition ' + (i + 1)"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+
+  <button matButton type="button" (click)="addCondition()" [disabled]="fields().length === 0">
+    <mat-icon>add</mat-icon>
+    Add condition
+  </button>
+</div>

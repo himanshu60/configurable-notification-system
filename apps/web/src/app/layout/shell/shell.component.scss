@@ -1,0 +1,245 @@
+@use '../../../styles/tokens' as *;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.shell {
+  height: 100vh;
+  background: var(--app-page-bg);
+}
+
+// ---------------------------------------------------------------------------
+// Sidebar
+// ---------------------------------------------------------------------------
+
+.drawer {
+  width: 264px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--app-ring);
+  background: var(--app-elevated);
+  padding: 0 $space-3;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-5 $space-2 $space-5;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: $radius-md;
+  background: linear-gradient(
+    135deg,
+    var(--mat-sys-primary),
+    color-mix(in srgb, var(--mat-sys-primary) 55%, var(--mat-sys-tertiary))
+  );
+  color: var(--mat-sys-on-primary);
+  box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--mat-sys-primary) 70%, transparent);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+
+  strong {
+    font-size: 0.98rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+  }
+
+  span {
+    font-size: 0.75rem;
+  }
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: $space-2;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  height: 42px;
+  padding: 0 $space-3;
+  border-radius: $radius-md;
+  color: var(--mat-sys-on-surface-variant);
+  text-decoration: none;
+  font-size: 0.885rem;
+  font-weight: 500;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+
+  mat-icon {
+    flex: none;
+    color: currentcolor;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 5%, transparent);
+    color: var(--mat-sys-on-surface);
+  }
+
+  // `active` is applied by routerLinkActive.
+  &.active {
+    background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+    color: var(--mat-sys-primary);
+    font-weight: 600;
+  }
+}
+
+.nav-label {
+  flex: 1;
+}
+
+.count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: $radius-pill;
+  background: var(--mat-sys-error);
+  color: var(--mat-sys-on-error);
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+
+.drawer-foot {
+  margin-top: auto;
+  padding: $space-4 $space-2;
+}
+
+.env-note {
+  display: flex;
+  gap: $space-2;
+  padding: $space-3;
+  border-radius: $radius-md;
+  background: color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent);
+  border: 1px solid var(--app-ring);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Top bar
+// ---------------------------------------------------------------------------
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 60px;
+  gap: $space-1;
+  padding: 0 $space-4;
+  background: color-mix(in srgb, var(--app-elevated) 82%, transparent);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border-bottom: 1px solid var(--app-ring);
+}
+
+.account {
+  gap: $space-2;
+  padding-left: 6px;
+  padding-right: $space-2;
+  height: 40px;
+  border-radius: $radius-pill;
+
+  .chevron {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--mat-sys-primary),
+    color-mix(in srgb, var(--mat-sys-primary) 50%, var(--mat-sys-tertiary))
+  );
+  color: var(--mat-sys-on-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.account-name {
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.menu-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid var(--app-ring);
+
+  strong {
+    font-size: 0.88rem;
+  }
+
+  span {
+    font-size: 0.78rem;
+  }
+}
+
+/**
+ * `mat-sidenav-content` is a flex item and will happily grow to fit a wide
+ * child, which lets a min-width table drag the whole page sideways. `min-width:
+ * 0` makes it respect the viewport so `.table-scroll` scrolls internally instead.
+ */
+mat-sidenav-content {
+  min-width: 0;
+}
+
+main {
+  min-height: calc(100vh - 60px);
+  min-width: 0;
+  overflow-x: clip;
+}
+
+@media (max-width: $breakpoint-sm) {
+  .account-name,
+  .account .chevron {
+    display: none;
+  }
+
+  .account {
+    min-width: 0;
+    padding: 0 6px;
+  }
+
+  .topbar {
+    padding: 0 $space-2;
+  }
+}

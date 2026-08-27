@@ -1,0 +1,11 @@
+<header class="header">
+  <div class="titles">
+    <h1>{{ title() }}</h1>
+    @if (subtitle()) {
+      <p class="text-muted">{{ subtitle() }}</p>
+    }
+  </div>
+  <div class="actions">
+    <ng-content />
+  </div>
+</header>

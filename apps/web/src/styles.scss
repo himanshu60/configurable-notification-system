@@ -1,0 +1,296 @@
+@use '@angular/material' as mat;
+@use './styles/tokens' as *;
+
+/**
+ * Material 3 with a custom palette. Both schemes are declared up front so the
+ * theme toggle is a class swap on <html> rather than a stylesheet reload.
+ */
+html {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$violet-palette,
+        tertiary: mat.$cyan-palette,
+        theme-type: light,
+      ),
+      typography: (
+        plain-family: $font-sans,
+        brand-family: $font-sans,
+      ),
+      density: 0,
+    )
+  );
+
+  /**
+   * M3 tints every neutral with the primary hue, which puts a lavender cast on
+   * every card and chip and reads as an unfinished Material demo. Accent colour
+   * stays violet; the greys are pulled back to true neutrals.
+   */
+  --mat-sys-surface: #ffffff;
+  --mat-sys-surface-dim: #e6e8ee;
+  --mat-sys-surface-bright: #ffffff;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #fafbfc;
+  --mat-sys-surface-container: #f3f4f7;
+  --mat-sys-surface-container-high: #edeef2;
+  --mat-sys-surface-container-highest: #e6e8ee;
+  --mat-sys-surface-variant: #eceef3;
+  --mat-sys-on-surface: #16181d;
+  --mat-sys-on-surface-variant: #5b6070;
+  --mat-sys-outline: #8b91a1;
+  --mat-sys-outline-variant: #dfe2e9;
+  --mat-sys-background: #f5f6fa;
+  --mat-sys-on-background: #16181d;
+
+  --app-page-bg: #f5f6fa;
+  --app-elevated: #ffffff;
+  --app-ring: rgb(15 23 42 / 9%);
+  --app-shadow: 0 1px 2px rgb(15 23 42 / 4%), 0 8px 24px -12px rgb(15 23 42 / 12%);
+  --app-shadow-hover: 0 1px 2px rgb(15 23 42 / 5%), 0 16px 36px -16px rgb(15 23 42 / 22%);
+}
+
+html.dark {
+  color-scheme: dark;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$violet-palette,
+        tertiary: mat.$cyan-palette,
+        theme-type: dark,
+      ),
+    )
+  );
+
+  // Same neutralisation for the dark scheme.
+  --mat-sys-surface: #0f1117;
+  --mat-sys-surface-dim: #0b0d13;
+  --mat-sys-surface-bright: #262b38;
+  --mat-sys-surface-container-lowest: #0a0c11;
+  --mat-sys-surface-container-low: #14161f;
+  --mat-sys-surface-container: #191c26;
+  --mat-sys-surface-container-high: #1f232e;
+  --mat-sys-surface-container-highest: #262b38;
+  --mat-sys-surface-variant: #262b38;
+  --mat-sys-on-surface: #e7e9ef;
+  --mat-sys-on-surface-variant: #a3a9b9;
+  --mat-sys-outline: #6c7382;
+  --mat-sys-outline-variant: #2b3040;
+  --mat-sys-background: #0b0d14;
+  --mat-sys-on-background: #e7e9ef;
+
+  --app-page-bg: #0b0d14;
+  --app-elevated: #14161f;
+  --app-ring: rgb(255 255 255 / 9%);
+  --app-shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 60%);
+  --app-shadow-hover: 0 1px 2px rgb(0 0 0 / 50%), 0 16px 36px -16px rgb(0 0 0 / 80%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: $font-sans;
+  background: var(--app-page-bg);
+  color: var(--mat-sys-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.005em;
+}
+
+/**
+ * The icon font is served from our own origin rather than a CDN.
+ *
+ * These are ligature icons: if the font fails to arrive, every `<mat-icon>menu`
+ * renders the literal word "menu". Depending on a third-party host for that
+ * means one blocked domain turns the entire UI into scattered text, which is
+ * exactly what happens on a locked-down corporate network.
+ */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/material-symbols.woff2') format('woff2');
+}
+
+.material-symbols-outlined,
+mat-icon.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+// mat-icon reserves 24px; keep the glyph centred inside it at our 20px size.
+mat-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/**
+ * Ligature icons render as their literal text ("menu", "search") until the font
+ * arrives. On a slow connection, or if Google Fonts is unreachable entirely,
+ * that turns the whole UI into scattered words. Icons stay transparent until
+ * `document.fonts.ready` resolves, so the layout is stable and the fallback is
+ * empty space rather than garbled text.
+ */
+.material-symbols-outlined {
+  color: transparent;
+}
+
+html.icons-ready .material-symbols-outlined {
+  color: inherit;
+}
+
+// ---------------------------------------------------------------------------
+// Page scaffolding, kept global so every feature lays out identically.
+// ---------------------------------------------------------------------------
+
+.page {
+  padding: $space-6 $space-6 $space-7;
+  max-width: 1440px;
+  margin: 0 auto;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $space-5 $space-4 $space-6;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $space-4 $space-3 $space-5;
+  }
+}
+
+.surface-card {
+  background: var(--app-elevated);
+  border: 1px solid var(--app-ring);
+  border-radius: $radius-lg;
+  box-shadow: var(--app-shadow);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.text-muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.mono {
+  font-family: $font-mono;
+  font-size: 0.8125rem;
+  font-feature-settings: 'zero' 1;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Wide content scrolls inside its own container; the page never scrolls sideways.
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+// ---------------------------------------------------------------------------
+// Material overrides that make the stock components feel less like a demo.
+// ---------------------------------------------------------------------------
+
+.mat-mdc-card {
+  --mdc-outlined-card-container-color: var(--app-elevated);
+  --mdc-outlined-card-outline-color: var(--app-ring);
+  --mdc-outlined-card-container-shape: #{$radius-lg};
+  box-shadow: var(--app-shadow) !important;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-outlined-button,
+.mat-mdc-button {
+  --mdc-text-button-container-shape: #{$radius-md};
+  --mdc-filled-button-container-shape: #{$radius-md};
+  --mdc-outlined-button-container-shape: #{$radius-md};
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel {
+  border-radius: $radius-md !important;
+  border: 1px solid var(--app-ring);
+}
+
+.mat-mdc-tooltip {
+  font-size: 0.75rem;
+}
+
+// Snackbar tones. Colour plus wording, never colour alone.
+.toast-success {
+  --mdc-snackbar-container-color: #12693f;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #b9f4d0;
+}
+
+.toast-error {
+  --mdc-snackbar-container-color: #8f1d1d;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffd4d4;
+}
+
+// A visible, consistent focus ring everywhere, not just where Material adds one.
+:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

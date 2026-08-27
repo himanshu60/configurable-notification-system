@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+build/
+out-tsc/
+*.tsbuildinfo
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# testing
+coverage/
+.nyc_output/
+
+# angular
+.angular/
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# editors / os
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db

@@ -1,0 +1,156 @@
+<div class="page">
+  <cns-page-header
+    title="Notification rules"
+    subtitle="Decide which events matter, who hears about them and on which channel."
+  >
+    <a matButton="filled" routerLink="/rules/new">
+      <mat-icon>add</mat-icon>
+      New rule
+    </a>
+  </cns-page-header>
+
+  <div class="filters surface-card">
+    <mat-form-field class="search" subscriptSizing="dynamic">
+      <mat-label>Search rules</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        [formControl]="searchControl"
+        (input)="onSearchChanged()"
+        placeholder="Name or description"
+      />
+    </mat-form-field>
+
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label>Trigger</mat-label>
+      <mat-select
+        [value]="eventTypeFilter()"
+        (valueChange)="eventTypeFilter.set($event); onFilterChanged()"
+      >
+        <mat-option value="">All triggers</mat-option>
+        @for (event of catalog.catalog()?.events ?? []; track event.type) {
+          <mat-option [value]="event.type">{{ event.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field subscriptSizing="dynamic">
+      <mat-label>Status</mat-label>
+      <mat-select
+        [value]="enabledFilter()"
+        (valueChange)="enabledFilter.set($event); onFilterChanged()"
+      >
+        <mat-option value="">Any status</mat-option>
+        <mat-option value="true">Enabled</mat-option>
+        <mat-option value="false">Disabled</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    @if (hasFilters()) {
+      <button matButton (click)="clearFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Clear
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" class="loader" />
+  }
+
+  @if (!loading() && rules().length === 0) {
+    <div class="surface-card">
+      <cns-empty-state
+        icon="rule"
+        [title]="hasFilters() ? 'No rules match those filters' : 'No rules yet'"
+        [message]="
+          hasFilters()
+            ? 'Try a different search or clear the filters.'
+            : 'Create your first rule to start turning events into notifications.'
+        "
+      >
+        @if (hasFilters()) {
+          <button matButton="filled" (click)="clearFilters()">Clear filters</button>
+        } @else {
+          <a matButton="filled" routerLink="/rules/new">Create a rule</a>
+        }
+      </cns-empty-state>
+    </div>
+  } @else {
+    <div class="rule-grid">
+      @for (rule of rules(); track rule.id) {
+        <mat-card appearance="outlined" class="rule-card" [class.disabled]="!rule.enabled">
+          <div class="card-top">
+            <div class="titles">
+              <a class="name" [routerLink]="['/rules', rule.id]">{{ rule.name }}</a>
+              @if (rule.description) {
+                <p class="text-muted truncate-2">{{ rule.description }}</p>
+              }
+            </div>
+
+            <div class="card-actions">
+              <mat-slide-toggle
+                [checked]="rule.enabled"
+                (change)="toggleEnabled(rule, $event.checked)"
+                [matTooltip]="rule.enabled ? 'Disable rule' : 'Enable rule'"
+                [aria-label]="'Toggle ' + rule.name"
+              />
+              <button matIconButton [matMenuTriggerFor]="menu" [attr.aria-label]="'Actions for ' + rule.name">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <a mat-menu-item [routerLink]="['/rules', rule.id]">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </a>
+                <button mat-menu-item (click)="remove(rule)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </div>
+          </div>
+
+          <dl class="details">
+            <div>
+              <dt>Trigger</dt>
+              <dd>{{ eventLabel(rule.eventType) }}</dd>
+            </div>
+            <div>
+              <dt>When</dt>
+              <dd class="condition">{{ conditionSummary(rule) }}</dd>
+            </div>
+            <div>
+              <dt>Recipients</dt>
+              <dd>{{ rule.recipients.length }}</dd>
+            </div>
+          </dl>
+
+          <mat-chip-set class="channels" aria-label="Channels">
+            @for (channel of rule.channels; track channel) {
+              <mat-chip disableRipple>
+                <mat-icon matChipAvatar>{{ channel === 'EMAIL' ? 'mail' : 'notifications' }}</mat-icon>
+                {{ channelLabels[channel] }}
+              </mat-chip>
+            }
+            @if (rule.dedupeWindowSec > 0) {
+              <mat-chip disableRipple matTooltip="Collapses repeat notifications inside this window">
+                <mat-icon matChipAvatar>filter_alt</mat-icon>
+                {{ rule.dedupeWindowSec }}s window
+              </mat-chip>
+            }
+          </mat-chip-set>
+        </mat-card>
+      }
+    </div>
+
+    <mat-paginator
+      [length]="total()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[10, 20, 50]"
+      (page)="onPage($event)"
+      showFirstLastButtons
+    />
+  }
+</div>
