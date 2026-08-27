@@ -123,6 +123,21 @@ describe('http interceptors', () => {
     expect(navigatedTo).toContainEqual(['/login']);
   });
 
+  it('reports a rejected sign-in instead of failing silently', () => {
+    // Regression: a 401 with no active session matched neither branch, so a
+    // wrong password produced no message at all.
+    http.post('/api/v1/auth/login', {}).subscribe({ error: () => undefined });
+
+    controller
+      .expectOne('/api/v1/auth/login')
+      .flush(
+        { error: { code: 'UNAUTHORIZED', message: 'Email or password is incorrect' } },
+        { status: 401, statusText: 'Unauthorized' },
+      );
+
+    expect(toastErrors).toContain('Email or password is incorrect');
+  });
+
   it('does not redirect on a 401 when there was no session to begin with', () => {
     http.get('/api/v1/auth/login').subscribe({ error: () => undefined });
 

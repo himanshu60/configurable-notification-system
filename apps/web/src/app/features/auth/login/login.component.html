@@ -70,6 +70,14 @@
 
       @if (mode() === 'signin') {
         <form [formGroup]="loginForm" (ngSubmit)="signIn()" class="form">
+
+      @if (formError(); as message) {
+        <p class="form-error" role="alert">
+          <mat-icon aria-hidden="true">error</mat-icon>
+          <span>{{ message }}</span>
+        </p>
+      }
+
           <mat-form-field>
             <mat-label>Email</mat-label>
             <mat-icon matPrefix>mail</mat-icon>
@@ -121,6 +129,14 @@
         </form>
       } @else {
         <form [formGroup]="registerForm" (ngSubmit)="signUp()" class="form">
+
+      @if (formError(); as message) {
+        <p class="form-error" role="alert">
+          <mat-icon aria-hidden="true">error</mat-icon>
+          <span>{{ message }}</span>
+        </p>
+      }
+
           <mat-form-field>
             <mat-label>Full name</mat-label>
             <mat-icon matPrefix>person</mat-icon>

@@ -190,6 +190,27 @@
   font-size: 0.94rem;
 }
 
+.form-error {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-2;
+  margin: 0;
+  padding: $space-3;
+  border-radius: $radius-md;
+  background: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-error) 35%, transparent);
+  color: var(--mat-sys-error);
+  font-size: 0.83rem;
+  line-height: 1.5;
+
+  mat-icon {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
 .demo-hint {
   display: flex;
   align-items: flex-start;

@@ -7,6 +7,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { HttpErrorResponse } from '@angular/common/http';
+import { isApiErrorBody } from '@cns/shared';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { ThemeService } from '../../../core/ui/theme.service';
 import { ToastService } from '../../../core/ui/toast.service';
@@ -37,6 +39,8 @@ export class LoginComponent {
   protected readonly theme = inject(ThemeService);
 
   protected readonly submitting = signal(false);
+  /** Shown in the card itself; a toast alone is easy to miss mid-typing. */
+  protected readonly formError = signal<string | null>(null);
   protected readonly showPassword = signal(false);
   protected readonly mode = signal<Mode>('signin');
 
@@ -55,6 +59,16 @@ export class LoginComponent {
   protected setMode(mode: Mode): void {
     this.mode.set(mode);
     this.showPassword.set(false);
+    this.formError.set(null);
+  }
+
+  /** Prefers the API's own wording over a generic fallback. */
+  private describe(error: unknown, fallback: string): string {
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 0) return 'Cannot reach the server. Check your connection.';
+      if (isApiErrorBody(error.error)) return error.error.error.message;
+    }
+    return fallback;
   }
 
   protected signIn(): void {
@@ -63,10 +77,14 @@ export class LoginComponent {
       return;
     }
 
+    this.formError.set(null);
     this.submitting.set(true);
     this.auth.login(this.loginForm.getRawValue()).subscribe({
       next: (result) => this.onAuthenticated(`Welcome back, ${result.user.name.split(' ')[0]}`),
-      error: () => this.submitting.set(false),
+      error: (error: unknown) => {
+        this.submitting.set(false);
+        this.formError.set(this.describe(error, 'Sign in failed. Please try again.'));
+      },
     });
   }
 
@@ -76,15 +94,20 @@ export class LoginComponent {
       return;
     }
 
+    this.formError.set(null);
     this.submitting.set(true);
     this.auth.register(this.registerForm.getRawValue()).subscribe({
       next: () => this.onAuthenticated('Account created'),
-      error: () => this.submitting.set(false),
+      error: (error: unknown) => {
+        this.submitting.set(false);
+        this.formError.set(this.describe(error, 'Could not create the account.'));
+      },
     });
   }
 
   private onAuthenticated(message: string): void {
     this.submitting.set(false);
+    this.formError.set(null);
     this.toast.success(message);
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
     void this.router.navigateByUrl(returnUrl);

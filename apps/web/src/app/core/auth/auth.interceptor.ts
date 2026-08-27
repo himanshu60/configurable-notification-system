@@ -38,6 +38,10 @@ const messageFor = (error: HttpErrorResponse): string => {
 /**
  * Turns every failed response into one visible, readable message, and signs the
  * user out on a 401 so an expired token cannot leave the UI in a half-dead state.
+ *
+ * A 401 means two different things depending on whether a session exists: an
+ * expired token, or a rejected sign-in. Both must say something - an earlier
+ * version reported neither, so a wrong password failed silently.
  */
 export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   const toast = inject(ToastService);
@@ -51,7 +55,9 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
           auth.logout();
           void router.navigate(['/login']);
           toast.error('Your session expired. Please sign in again.');
-        } else if (error.status !== 401) {
+        } else {
+          // Includes a rejected sign-in, where the API's own wording ("Email or
+          // password is incorrect") is exactly what the user needs to see.
           toast.error(messageFor(error));
         }
       }
