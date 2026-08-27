@@ -6,6 +6,12 @@ A production-shaped notification platform where users define **when** they want 
 Fire `order.created` with `order.value = 15000`, and a rule that says *notify me when order value
 is over $10,000* produces the notification — rendered, queued, delivered and recorded.
 
+**Live demo:** https://configurable-notification-system-lg29.onrender.com
+
+> Hosted on Render's free tier, so the first request after ~15 minutes idle takes 30-50 seconds
+> while the instance wakes. Register an account, or seed the demo data as described under
+> [Deploying to Render](#deploying-to-render).
+
 ---
 
 ## Contents
