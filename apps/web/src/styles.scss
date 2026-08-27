@@ -2,8 +2,8 @@
 @use './styles/tokens' as *;
 
 /**
- * Material 3 with a custom palette. Both light and dark schemes are declared so
- * the theme toggle is a class swap rather than a stylesheet reload.
+ * Material 3 with a custom palette. Both schemes are declared up front so the
+ * theme toggle is a class swap on <html> rather than a stylesheet reload.
  */
 html {
   color-scheme: light;
@@ -22,6 +22,14 @@ html {
       density: 0,
     )
   );
+
+  // Surfaces are deliberately a touch cooler and lighter than the M3 defaults,
+  // which read grey and flat on a dense admin screen.
+  --app-page-bg: #f6f7fb;
+  --app-elevated: #ffffff;
+  --app-ring: rgba(15, 23, 42, 0.08);
+  --app-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.12);
+  --app-shadow-hover: 0 1px 2px rgba(15, 23, 42, 0.05), 0 16px 36px -16px rgba(15, 23, 42, 0.22);
 }
 
 html.dark {
@@ -36,6 +44,12 @@ html.dark {
       ),
     )
   );
+
+  --app-page-bg: #0b0d14;
+  --app-elevated: #14161f;
+  --app-ring: rgba(255, 255, 255, 0.08);
+  --app-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --app-shadow-hover: 0 1px 2px rgba(0, 0, 0, 0.5), 0 16px 36px -16px rgba(0, 0, 0, 0.8);
 }
 
 * {
@@ -50,26 +64,75 @@ body {
 
 body {
   font-family: $font-sans;
-  background: var(--mat-sys-surface);
+  background: var(--app-page-bg);
   color: var(--mat-sys-on-surface);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.005em;
 }
 
-// Reusable page scaffolding, kept global so every feature lays out identically.
+/**
+ * Material Symbols renders as its ligature text until the font is applied.
+ * mat-icon gets `material-symbols-outlined` from MAT_ICON_DEFAULT_OPTIONS; this
+ * gives that class the font, a consistent optical size, and the variable-font
+ * axes that keep icons from looking heavy next to 14px text.
+ */
+.material-symbols-outlined,
+mat-icon.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+// mat-icon reserves 24px; keep the glyph centred inside it at our 20px size.
+mat-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+// ---------------------------------------------------------------------------
+// Page scaffolding, kept global so every feature lays out identically.
+// ---------------------------------------------------------------------------
+
 .page {
-  padding: $space-6;
-  max-width: 1400px;
+  padding: $space-6 $space-6 $space-7;
+  max-width: 1440px;
   margin: 0 auto;
 
-  @media (max-width: 720px) {
-    padding: $space-4 $space-3;
+  @media (max-width: $breakpoint-md) {
+    padding: $space-5 $space-4 $space-6;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: $space-4 $space-3 $space-5;
   }
 }
 
 .surface-card {
-  background: var(--mat-sys-surface-container-low);
-  border: 1px solid var(--mat-sys-outline-variant);
+  background: var(--app-elevated);
+  border: 1px solid var(--app-ring);
   border-radius: $radius-lg;
+  box-shadow: var(--app-shadow);
 }
 
 .stack {
@@ -95,6 +158,7 @@ body {
 .mono {
   font-family: $font-mono;
   font-size: 0.8125rem;
+  font-feature-settings: 'zero' 1;
 }
 
 .truncate {
@@ -103,10 +167,67 @@ body {
   white-space: nowrap;
 }
 
-// Tables scroll inside their own container so the page never scrolls sideways.
+// Wide content scrolls inside its own container; the page never scrolls sideways.
 .table-scroll {
   width: 100%;
   overflow-x: auto;
+}
+
+// ---------------------------------------------------------------------------
+// Material overrides that make the stock components feel less like a demo.
+// ---------------------------------------------------------------------------
+
+.mat-mdc-card {
+  --mdc-outlined-card-container-color: var(--app-elevated);
+  --mdc-outlined-card-outline-color: var(--app-ring);
+  --mdc-outlined-card-container-shape: #{$radius-lg};
+  box-shadow: var(--app-shadow) !important;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-outlined-button,
+.mat-mdc-button {
+  --mdc-text-button-container-shape: #{$radius-md};
+  --mdc-filled-button-container-shape: #{$radius-md};
+  --mdc-outlined-button-container-shape: #{$radius-md};
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel {
+  border-radius: $radius-md !important;
+  border: 1px solid var(--app-ring);
+}
+
+.mat-mdc-tooltip {
+  font-size: 0.75rem;
+}
+
+// Snackbar tones. Colour plus wording, never colour alone.
+.toast-success {
+  --mdc-snackbar-container-color: #12693f;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #b9f4d0;
+}
+
+.toast-error {
+  --mdc-snackbar-container-color: #8f1d1d;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffd4d4;
+}
+
+// A visible, consistent focus ring everywhere, not just where Material adds one.
+:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {

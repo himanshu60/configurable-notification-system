@@ -15,29 +15,40 @@
       </div>
     </div>
 
-    <mat-nav-list>
+    <nav class="nav" aria-label="Main">
       @for (item of navItems; track item.path) {
         <a
-          mat-list-item
+          class="nav-item"
           [routerLink]="item.path"
           routerLinkActive="active"
-          #link="routerLinkActive"
-          [activated]="link.isActive"
+          [routerLinkActiveOptions]="{ exact: false }"
           (click)="closeOnHandset()"
         >
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          <span matListItemTitle>{{ item.label }}</span>
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span class="nav-label">{{ item.label }}</span>
           @if (item.path === '/inbox' && notifications.unreadCount() > 0) {
-            <span matListItemMeta class="count">{{ notifications.unreadCount() }}</span>
+            <span class="count">{{ notifications.unreadCount() }}</span>
           }
         </a>
       }
-    </mat-nav-list>
+    </nav>
+
+    <div class="drawer-foot">
+      <div class="env-note">
+        <mat-icon>info</mat-icon>
+        <span>Email delivery is mocked. Set a failure rate in .env to demo retries.</span>
+      </div>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content>
     <mat-toolbar class="topbar">
-      <button matIconButton (click)="toggleDrawer()" aria-label="Toggle navigation">
+      <button
+        matIconButton
+        class="menu-toggle"
+        (click)="toggleDrawer()"
+        aria-label="Toggle navigation"
+      >
         <mat-icon>menu</mat-icon>
       </button>
 
@@ -46,6 +57,9 @@
       <button
         matIconButton
         [matTooltip]="theme.theme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+        [attr.aria-label]="
+          theme.theme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
+        "
         (click)="theme.toggle()"
       >
         <mat-icon>{{ theme.theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
@@ -67,6 +81,7 @@
       <button matButton [matMenuTriggerFor]="accountMenu" class="account">
         <span class="avatar" aria-hidden="true">{{ auth.initials() }}</span>
         <span class="account-name">{{ auth.user()?.name }}</span>
+        <mat-icon class="chevron">expand_more</mat-icon>
       </button>
 
       <mat-menu #accountMenu="matMenu">

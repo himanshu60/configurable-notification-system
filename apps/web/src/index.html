@@ -9,17 +9,35 @@
       name="description"
       content="Define when and how you are notified: rules, conditions, channels and delivery history."
     />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="favicon.ico" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <!-- Variable axes are requested explicitly so the icon weight can be tuned
+         to sit correctly beside 14px UI text. -->
     <link
-      href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
       rel="stylesheet"
     />
+
+    <style>
+      /* Paint the page background before Angular boots so a slow first load
+         does not flash white in dark mode. */
+      html {
+        background: #f6f7fb;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        html:not(.light) {
+          background: #0b0d14;
+        }
+      }
+    </style>
   </head>
   <body>
     <app-root></app-root>

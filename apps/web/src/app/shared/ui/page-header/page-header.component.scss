@@ -11,24 +11,31 @@
 
 h1 {
   margin: 0;
-  font-size: 1.6rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
+  font-size: 1.55rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
 p {
-  margin: $space-1 0 0;
+  margin: 6px 0 0;
   font-size: 0.9rem;
-  max-width: 62ch;
+  line-height: 1.55;
+  max-width: 68ch;
 }
 
 .actions {
   display: flex;
   gap: $space-2;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 @media (max-width: $breakpoint-sm) {
+  h1 {
+    font-size: 1.32rem;
+  }
+
   .actions {
     width: 100%;
   }

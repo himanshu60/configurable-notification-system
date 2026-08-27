@@ -12,7 +12,6 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { interval, map, startWith, switchMap } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -52,7 +51,6 @@ const NAV_ITEMS: readonly NavItem[] = [
     RouterLinkActive,
     MatToolbarModule,
     MatSidenavModule,
-    MatListModule,
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
