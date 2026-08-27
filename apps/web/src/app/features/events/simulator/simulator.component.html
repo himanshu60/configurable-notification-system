@@ -21,6 +21,9 @@
         <mat-form-field>
           <mat-label>Event type</mat-label>
           <mat-select formControlName="type" (valueChange)="onTypeChanged()">
+            <mat-select-trigger>
+              {{ catalog.eventType(form.controls.type.value)?.label }}
+            </mat-select-trigger>
             @for (event of catalog.catalog()?.events ?? []; track event.type) {
               <mat-option [value]="event.type">
                 {{ event.label }}

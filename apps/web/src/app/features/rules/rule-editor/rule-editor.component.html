@@ -31,6 +31,10 @@
           <mat-form-field>
             <mat-label>Trigger</mat-label>
             <mat-select formControlName="eventType" (valueChange)="onEventTypeChanged()">
+              <!-- The dot path helps when picking, but would clutter the closed field. -->
+              <mat-select-trigger>
+                {{ catalog.eventType(form.controls.eventType.value)?.label }}
+              </mat-select-trigger>
               @for (event of catalog.catalog()?.events ?? []; track event.type) {
                 <mat-option [value]="event.type">
                   {{ event.label }}
