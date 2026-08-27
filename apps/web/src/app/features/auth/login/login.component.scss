@@ -3,6 +3,7 @@
 :host {
   display: block;
   min-height: 100vh;
+  background: var(--app-page-bg);
 }
 
 .auth-page {
@@ -11,35 +12,47 @@
   min-height: 100vh;
 }
 
+// ---------------------------------------------------------------------------
+// Left: the pitch
+// ---------------------------------------------------------------------------
+
 .pitch {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: $space-4;
-  padding: $space-7;
+  gap: $space-5;
+  padding: $space-7 clamp(#{$space-6}, 6vw, 88px);
+  overflow: hidden;
+  color: #f8fafc;
   background:
-    radial-gradient(
-      120% 90% at 10% 0%,
-      color-mix(in srgb, var(--mat-sys-primary) 26%, transparent),
-      transparent 62%
-    ),
-    var(--mat-sys-surface-container-low);
-  border-right: 1px solid var(--mat-sys-outline-variant);
+    radial-gradient(90% 70% at 15% 8%, rgba(167, 139, 250, 0.42), transparent 62%),
+    radial-gradient(70% 60% at 92% 96%, rgba(34, 211, 238, 0.28), transparent 60%),
+    linear-gradient(155deg, #16121f 0%, #0d0b14 55%, #090810 100%);
+}
 
-  h1 {
-    margin: 0;
-    font-size: clamp(1.9rem, 3vw, 2.6rem);
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    max-width: 16ch;
-  }
+// Subtle grid so the large dark panel is not a flat block of colour.
+.pitch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(80% 70% at 30% 20%, #000 25%, transparent 78%);
+  pointer-events: none;
+}
 
-  p {
-    margin: 0;
-    max-width: 48ch;
-    color: var(--mat-sys-on-surface-variant);
-    line-height: 1.6;
-  }
+.pitch > * {
+  position: relative;
+  z-index: 1;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
 }
 
 .brand-mark {
@@ -47,69 +60,206 @@
   place-items: center;
   width: 46px;
   height: 46px;
+  flex: none;
   border-radius: $radius-md;
-  background: var(--mat-sys-primary);
-  color: var(--mat-sys-on-primary);
+  background: linear-gradient(135deg, #a78bfa, #6366f1);
+  color: #fff;
+  box-shadow: 0 10px 28px -10px rgba(139, 92, 246, 0.9);
+}
+
+.brand-name {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+
+  strong {
+    font-size: 1.02rem;
+    font-weight: 650;
+  }
+
+  span {
+    font-size: 0.76rem;
+    color: rgba(248, 250, 252, 0.6);
+  }
+}
+
+.pitch h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3.2vw, 2.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  font-weight: 650;
+  max-width: 15ch;
+}
+
+.lede {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(248, 250, 252, 0.68);
 }
 
 .features {
   list-style: none;
-  margin: $space-4 0 0;
+  margin: $space-2 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: $space-3;
+  gap: $space-4;
 
   li {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: $space-3;
-    font-size: 0.92rem;
-    color: var(--mat-sys-on-surface-variant);
-  }
-
-  mat-icon {
-    color: var(--mat-sys-primary);
-    flex: none;
   }
 }
+
+.feature-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: $radius-sm;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #c4b5fd;
+}
+
+.feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: 0.9rem;
+    font-weight: 550;
+  }
+
+  span {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: rgba(248, 250, 252, 0.55);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Right: the form
+// ---------------------------------------------------------------------------
 
 .form-panel {
   display: grid;
   place-items: center;
-  padding: $space-5;
+  padding: $space-6 $space-5;
 }
 
 .card {
-  width: min(440px, 100%);
+  width: min(430px, 100%);
   overflow: hidden;
+  border-radius: $radius-lg;
+  box-shadow: var(--app-shadow-hover) !important;
+}
+
+.card-head {
+  padding: $space-6 $space-6 0;
+
+  h2 {
+    margin: 0;
+    font-size: 1.32rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 6px 0 0;
+    font-size: 0.875rem;
+  }
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: $space-3;
-  padding: $space-5;
+  gap: $space-4;
+  padding: $space-5 $space-6 $space-6;
 }
 
-.hint {
+.submit {
+  height: 46px;
+  margin-top: $space-1;
+  font-size: 0.94rem;
+}
+
+.demo-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-2;
   margin: 0;
-  font-size: 0.8rem;
-  text-align: center;
+  padding: $space-3;
+  border-radius: $radius-md;
+  background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 22%, transparent);
+  font-size: 0.78rem;
+  line-height: 1.55;
+
+  mat-icon {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+    color: var(--mat-sys-primary);
+  }
+
+  code {
+    font-family: $font-mono;
+    font-size: 0.74rem;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent);
+  }
 }
 
-@media (max-width: $breakpoint-md) {
+.theme-toggle {
+  position: absolute;
+  top: $space-4;
+  right: $space-4;
+  z-index: 2;
+}
+
+// ---------------------------------------------------------------------------
+
+@media (max-width: $breakpoint-lg) {
   .auth-page {
     grid-template-columns: 1fr;
   }
 
   .pitch {
     padding: $space-6 $space-5 $space-5;
-    border-right: none;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    gap: $space-4;
+  }
+
+  .pitch h1 {
+    font-size: 1.75rem;
+    max-width: none;
   }
 
   .features {
     display: none;
+  }
+
+  .lede {
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .form-panel {
+    padding: $space-4 $space-3 $space-6;
+  }
+
+  .card-head,
+  .form {
+    padding-left: $space-4;
+    padding-right: $space-4;
   }
 }

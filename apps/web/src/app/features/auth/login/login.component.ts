@@ -1,15 +1,17 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTabsModule } from '@angular/material/tabs';
 import { AuthStore } from '../../../core/auth/auth.store';
+import { ThemeService } from '../../../core/ui/theme.service';
 import { ToastService } from '../../../core/ui/toast.service';
+
+type Mode = 'signin' | 'signup';
 
 @Component({
   selector: 'cns-login',
@@ -22,7 +24,6 @@ import { ToastService } from '../../../core/ui/toast.service';
     MatIconModule,
     MatInputModule,
     MatProgressBarModule,
-    MatTabsModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -33,8 +34,11 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
+  protected readonly theme = inject(ThemeService);
 
   protected readonly submitting = signal(false);
+  protected readonly showPassword = signal(false);
+  protected readonly mode = signal<Mode>('signin');
 
   /** Typed non-nullable forms: no `string | null` leaking into the payload. */
   protected readonly loginForm = this.fb.nonNullable.group({
@@ -47,6 +51,11 @@ export class LoginComponent {
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
+
+  protected setMode(mode: Mode): void {
+    this.mode.set(mode);
+    this.showPassword.set(false);
+  }
 
   protected signIn(): void {
     if (this.loginForm.invalid || this.submitting()) {
