@@ -25,6 +25,8 @@ const envSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().min(1).default(300),
 
   WORKER_ENABLED: z.enum(['true', 'false']).default('true'),
+  // Serve the built Angular client from this process (single-service deploy).
+  SERVE_WEB: z.enum(['true', 'false']).default('false'),
   WORKER_ID: z.string().default('api-1'),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().min(50).default(1000),
   WORKER_BATCH_SIZE: z.coerce.number().int().min(1).max(500).default(10),
@@ -60,6 +62,7 @@ export const env = {
     .map((origin) => origin.trim())
     .filter(Boolean),
   workerEnabled: raw.WORKER_ENABLED === 'true',
+  serveWeb: raw.SERVE_WEB === 'true',
 } as const;
 
 export type Env = typeof env;

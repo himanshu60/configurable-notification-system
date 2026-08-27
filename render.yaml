@@ -1,18 +1,25 @@
 # Render blueprint. From the dashboard: New > Blueprint, point it at this repo.
 #
-# Two services: the API as a web service, the Angular build as a static site.
-# The static site rewrites /api/* to the API, so the browser only ever talks to
-# one origin - no CORS, and no API URL baked into the bundle.
+# One service. The Express process serves the API and the built Angular client,
+# so the whole system is a single deployable on a single origin: no CORS, no
+# rewrite rules, and no API URL compiled into the bundle.
+#
+# To split them later, set SERVE_WEB=false here and add a static site publishing
+# apps/web/dist/web/browser with a rewrite from /api/* to this service.
 services:
   - type: web
-    name: cns-api
+    name: cns
     runtime: node
     plan: free
-    region: oregon
+    region: singapore
     branch: main
     # --include=dev is required: NODE_ENV=production would otherwise make npm
-    # skip devDependencies, and the build needs TypeScript.
-    buildCommand: npm ci --include=dev && npm run build -w @cns/shared && npm run build -w @cns/api
+    # skip devDependencies, and the build needs TypeScript and the Angular CLI.
+    buildCommand: >-
+      npm ci --include=dev &&
+      npm run build -w @cns/shared &&
+      npm run build -w @cns/api &&
+      npm run build -w @cns/web
     startCommand: node apps/api/dist/server.js
     healthCheckPath: /health/ready
     envVars:
@@ -29,40 +36,17 @@ services:
         value: 1d
       - key: BCRYPT_ROUNDS
         value: '12'
-      # Requests arrive same-origin via the static site rewrite, so this only
-      # needs to cover direct API calls (curl, Postman, another client).
+      # The client is served from this process, so requests are same-origin and
+      # CORS only matters for direct API calls from elsewhere.
       - key: CORS_ORIGINS
-        fromService:
-          type: web
-          name: cns-web
-          property: host
+        value: http://localhost:4200
+      - key: SERVE_WEB
+        value: 'true'
       - key: WORKER_ENABLED
         value: 'true'
       - key: WORKER_ID
-        value: render-api-1
+        value: render-1
       - key: DELIVERY_MAX_ATTEMPTS
         value: '4'
       - key: MOCK_EMAIL_FAILURE_RATE
         value: '0'
-
-  - type: web
-    name: cns-web
-    runtime: static
-    plan: free
-    branch: main
-    # Same reason as the API: the Angular CLI is a devDependency.
-    buildCommand: npm ci --include=dev && npm run build -w @cns/shared && npm run build -w @cns/web
-    staticPublishPath: apps/web/dist/web/browser
-    routes:
-      # API calls are proxied to the backend service on the same origin.
-      - type: rewrite
-        source: /api/*
-        destination: https://cns-api.onrender.com/api/*
-      # Angular owns routing, so every other path serves index.html.
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    headers:
-      - path: /fonts/*
-        name: Cache-Control
-        value: public, max-age=31536000, immutable
