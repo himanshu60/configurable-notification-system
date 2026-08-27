@@ -1,1 +1,119 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@use './styles/tokens' as *;
+
+/**
+ * Material 3 with a custom palette. Both light and dark schemes are declared so
+ * the theme toggle is a class swap rather than a stylesheet reload.
+ */
+html {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$violet-palette,
+        tertiary: mat.$cyan-palette,
+        theme-type: light,
+      ),
+      typography: (
+        plain-family: $font-sans,
+        brand-family: $font-sans,
+      ),
+      density: 0,
+    )
+  );
+}
+
+html.dark {
+  color-scheme: dark;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$violet-palette,
+        tertiary: mat.$cyan-palette,
+        theme-type: dark,
+      ),
+    )
+  );
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: $font-sans;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+// Reusable page scaffolding, kept global so every feature lays out identically.
+.page {
+  padding: $space-6;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: 720px) {
+    padding: $space-4 $space-3;
+  }
+}
+
+.surface-card {
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: $radius-lg;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.text-muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.mono {
+  font-family: $font-mono;
+  font-size: 0.8125rem;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Tables scroll inside their own container so the page never scrolls sideways.
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
