@@ -1,0 +1,108 @@
+<div class="auth-page">
+  <section class="pitch">
+    <div class="brand-mark" aria-hidden="true">
+      <mat-icon>notifications_active</mat-icon>
+    </div>
+    <h1>Decide exactly when you get told.</h1>
+    <p>
+      Build rules from real event fields, choose who hears about them and on which channel, and
+      watch every delivery from one place.
+    </p>
+
+    <ul class="features">
+      <li>
+        <mat-icon>rule</mat-icon>
+        <span>Conditions built from live event metadata</span>
+      </li>
+      <li>
+        <mat-icon>alt_route</mat-icon>
+        <span>Email and in-app channels, extensible by design</span>
+      </li>
+      <li>
+        <mat-icon>verified</mat-icon>
+        <span>Duplicate-safe ingestion with retries and dead letters</span>
+      </li>
+    </ul>
+  </section>
+
+  <section class="form-panel">
+    <mat-card appearance="outlined" class="card">
+      @if (submitting()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      <mat-tab-group>
+        <mat-tab label="Sign in">
+          <form [formGroup]="loginForm" (ngSubmit)="signIn()" class="form">
+            <mat-form-field>
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" autocomplete="email" />
+              @if (loginForm.controls.email.hasError('required')) {
+                <mat-error>Email is required</mat-error>
+              } @else if (loginForm.controls.email.hasError('email')) {
+                <mat-error>Enter a valid email address</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Password</mat-label>
+              <input
+                matInput
+                type="password"
+                formControlName="password"
+                autocomplete="current-password"
+              />
+              @if (loginForm.controls.password.hasError('required')) {
+                <mat-error>Password is required</mat-error>
+              }
+            </mat-form-field>
+
+            <button matButton="filled" type="submit" [disabled]="submitting()">Sign in</button>
+
+            <p class="hint text-muted">
+              Seeded demo account: <strong>demo&#64;cns.dev</strong> / <strong>Password123!</strong>
+            </p>
+          </form>
+        </mat-tab>
+
+        <mat-tab label="Create account">
+          <form [formGroup]="registerForm" (ngSubmit)="signUp()" class="form">
+            <mat-form-field>
+              <mat-label>Full name</mat-label>
+              <input matInput formControlName="name" autocomplete="name" />
+              @if (registerForm.controls.name.touched && registerForm.controls.name.invalid) {
+                <mat-error>Enter at least 2 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" autocomplete="email" />
+              @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
+                <mat-error>Enter a valid email address</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Password</mat-label>
+              <input
+                matInput
+                type="password"
+                formControlName="password"
+                autocomplete="new-password"
+              />
+              <mat-hint>At least 8 characters</mat-hint>
+              @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
+                <mat-error>At least 8 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <button matButton="filled" type="submit" [disabled]="submitting()">
+              Create account
+            </button>
+          </form>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  </section>
+</div>

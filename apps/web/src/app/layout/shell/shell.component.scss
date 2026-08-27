@@ -1,0 +1,108 @@
+@use '../../../styles/tokens' as *;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.shell {
+  height: 100vh;
+}
+
+.drawer {
+  width: 252px;
+  border-right: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-5 $space-4;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: $radius-md;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+
+  strong {
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+  }
+
+  span {
+    font-size: 0.75rem;
+  }
+}
+
+.count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: $radius-pill;
+  background: var(--mat-sys-error);
+  color: var(--mat-sys-on-error);
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: inline-grid;
+  place-items: center;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  gap: $space-1;
+  background: color-mix(in srgb, var(--mat-sys-surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.account {
+  gap: $space-2;
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.menu-header {
+  display: flex;
+  flex-direction: column;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  span {
+    font-size: 0.8rem;
+  }
+}
+
+main {
+  min-height: calc(100vh - 64px);
+}
+
+@media (max-width: $breakpoint-sm) {
+  .account-name {
+    display: none;
+  }
+}

@@ -1,0 +1,35 @@
+@use '../../../../styles/tokens' as *;
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $space-4;
+  flex-wrap: wrap;
+  margin-bottom: $space-5;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+p {
+  margin: $space-1 0 0;
+  font-size: 0.9rem;
+  max-width: 62ch;
+}
+
+.actions {
+  display: flex;
+  gap: $space-2;
+  flex-wrap: wrap;
+}
+
+@media (max-width: $breakpoint-sm) {
+  .actions {
+    width: 100%;
+  }
+}
