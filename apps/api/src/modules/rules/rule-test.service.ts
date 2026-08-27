@@ -56,6 +56,13 @@ export const testRule = async (
     );
 
     for (const channel of rule.channels) {
+      // Mirrors the fan-out rule in `rule-matcher`: a recipient with no account
+      // has no inbox. Previewing a delivery the real run would skip would make
+      // the dry run misleading.
+      if (channel === 'IN_APP' && !recipient.userId) {
+        continue;
+      }
+
       result.preview.push({
         channel,
         recipient: recipient.value,

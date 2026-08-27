@@ -282,3 +282,28 @@ describe('rule dry run', () => {
     expect(response.body.data.preview).toHaveLength(0);
   });
 });
+
+describe('dry run and the real run agree', () => {
+  it('does not preview an in-app delivery the fan-out would skip', async () => {
+    const created = await api()
+      .post('/api/v1/rules')
+      .set(auth(token))
+      .send(
+        ruleFixture({
+          recipients: [{ type: 'EMAIL', value: 'stranger@example.com' }],
+          channels: ['EMAIL', 'IN_APP'],
+        }),
+      )
+      .expect(201);
+
+    const response = await api()
+      .post(`/api/v1/rules/${created.body.data.id}/test`)
+      .set(auth(token))
+      .send({ payload: { order: { id: 'ORD-1', value: 15_000 } } })
+      .expect(200);
+
+    expect(response.body.data.matched).toBe(true);
+    expect(response.body.data.preview).toHaveLength(1);
+    expect(response.body.data.preview[0].channel).toBe('EMAIL');
+  });
+});
