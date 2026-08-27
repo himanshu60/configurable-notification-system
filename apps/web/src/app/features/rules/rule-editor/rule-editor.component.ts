@@ -76,6 +76,11 @@ export class RuleEditorComponent {
   protected readonly channels = NOTIFICATION_CHANNELS;
   protected readonly channelLabels = CHANNEL_LABELS;
 
+  // Kept out of the template: Angular would try to interpolate the braces.
+  protected readonly subjectPlaceholder = 'Order {{order.id}} is large';
+  protected readonly templateHint =
+    'Insert values with {{path}}, optionally formatted: {{order.value | currency}}';
+
   protected readonly ruleId = signal<string | null>(null);
   protected readonly saving = signal(false);
   protected readonly testing = signal(false);

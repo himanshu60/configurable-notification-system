@@ -126,40 +126,30 @@
       <mat-card appearance="outlined" class="section">
         <h2>Message</h2>
 
-        <mat-form-field>
-          <mat-label>Subject</mat-label>
-          <input
-            matInput
-            formControlName="subject"
-            [formControl]="form.controls.template.controls.subject"
-            placeholder="Order {{ '{{order.id}}' }} is large"
-          />
-          @if (
-            form.controls.template.controls.subject.touched &&
-            form.controls.template.controls.subject.invalid
-          ) {
-            <mat-error>A subject is required</mat-error>
-          }
-        </mat-form-field>
+        <div class="stack" formGroupName="template">
+          <mat-form-field>
+            <mat-label>Subject</mat-label>
+            <input matInput formControlName="subject" [placeholder]="subjectPlaceholder" />
+            @if (
+              form.controls.template.controls.subject.touched &&
+              form.controls.template.controls.subject.invalid
+            ) {
+              <mat-error>A subject is required</mat-error>
+            }
+          </mat-form-field>
 
-        <mat-form-field>
-          <mat-label>Body</mat-label>
-          <textarea
-            matInput
-            rows="6"
-            [formControl]="form.controls.template.controls.body"
-          ></textarea>
-          <mat-hint>
-            Insert values with {{ '{{path}}' }}, optionally formatted:
-            {{ '{{order.value | currency}}' }}
-          </mat-hint>
-          @if (
-            form.controls.template.controls.body.touched &&
-            form.controls.template.controls.body.invalid
-          ) {
-            <mat-error>A message body is required</mat-error>
-          }
-        </mat-form-field>
+          <mat-form-field>
+            <mat-label>Body</mat-label>
+            <textarea matInput rows="7" formControlName="body"></textarea>
+            <mat-hint>{{ templateHint }}</mat-hint>
+            @if (
+              form.controls.template.controls.body.touched &&
+              form.controls.template.controls.body.invalid
+            ) {
+              <mat-error>A message body is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
 
         @if (availableFields.length > 0) {
           <div class="tokens">
