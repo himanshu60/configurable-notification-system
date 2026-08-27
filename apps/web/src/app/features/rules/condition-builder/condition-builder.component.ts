@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import {
-  FormArray,
+  type FormArray,
   FormBuilder,
-  FormGroup,
+  type FormGroup,
   ReactiveFormsModule,
   Validators,
   type FormControl,

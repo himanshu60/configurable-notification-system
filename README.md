@@ -106,6 +106,21 @@ the worker, which can retry without the producer knowing or caring.
 | Tests | Vitest 4, Supertest |
 | Repo | npm workspaces monorepo |
 
+### Why MongoDB
+
+The brief left the database open. I chose MongoDB because two of this system's guarantees map
+directly onto things it does well: a unique index on `eventId` makes ingestion idempotent without
+a transaction, and `findOneAndUpdate` gives the worker an atomic claim without row locks or a
+coordination service. Event payloads are also genuinely schemaless — each event type carries a
+different shape, and the catalog rather than the database defines what a rule may reference.
+
+The same design ports to PostgreSQL cleanly: `eventId` becomes a `UNIQUE` constraint, payloads
+become `JSONB` with a GIN index, and the claim becomes
+`UPDATE … WHERE id = (SELECT id … FOR UPDATE SKIP LOCKED)` — which is arguably a better fit once
+the outbox is large, since it avoids the scan the Mongo claim performs. The repository layer is
+the only part that would change; the engine, the channel adapters and the worker's state machine
+are storage-agnostic by design.
+
 ---
 
 ## Setup
@@ -206,7 +221,7 @@ notification.
 npm test
 ```
 
-**83 backend tests** across 5 suites. They run against a real MongoDB (`cns-test`, dropped between
+**86 backend tests** across 5 suites, plus **26 frontend tests**. They run against a real MongoDB (`cns-test`, dropped between
 runs) rather than an in-memory substitute, because the idempotency and deduplication guarantees
 are enforced by unique indexes and by the atomicity of `findOneAndUpdate` — a fake would let those
 tests pass without proving anything.
@@ -338,7 +353,7 @@ Every component is three files — `.ts`, `.html`, `.scss` — in its own folder
 | Node/API design | versioned prefix, one response envelope, typed error codes, pagination, health checks |
 | Reusable and extensible | new channel = 1 file + 1 line; new event type = 1 catalog entry, UI follows |
 | Validation and error handling | zod at the edge, catalog-aware semantic validation, single error middleware |
-| Testing | 83 backend tests + frontend component/interceptor tests |
+| Testing | 86 backend + 26 frontend tests |
 | Failures | retries with jittered backoff, dead letters, stale-lock reclaim, graceful shutdown |
 | Duplicate events | two layers — unique `eventId`, unique `dedupeKey` with optional time window |
 | Scalability | atomic claim means N workers are safe today; outbox maps 1:1 onto a real queue |

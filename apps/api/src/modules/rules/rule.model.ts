@@ -1,4 +1,4 @@
-import { Schema, Types, model, type HydratedDocument, type Model } from 'mongoose';
+import { Schema, type Types, model, type HydratedDocument, type Model } from 'mongoose';
 import {
   CONDITION_LOGIC,
   CONDITION_OPERATORS,

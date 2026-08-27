@@ -1,4 +1,4 @@
-import { Schema, Types, model, type HydratedDocument, type Model } from 'mongoose';
+import { Schema, type Types, model, type HydratedDocument, type Model } from 'mongoose';
 import {
   DELIVERY_STATUSES,
   NOTIFICATION_CHANNELS,

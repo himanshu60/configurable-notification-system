@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FormArray, FormBuilder, type FormGroup } from '@angular/forms';
+import { type FormArray, FormBuilder, type FormGroup } from '@angular/forms';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { OPERATORS_BY_FIELD_TYPE, OPERATOR_LABELS, CONDITION_OPERATORS } from '@cns/shared';
 import { CatalogService, type CatalogResponse } from '../../../core/api/catalog.service';

@@ -2,7 +2,6 @@ import { z } from 'zod';
 import {
   DELIVERY_STATUSES,
   NOTIFICATION_CHANNELS,
-  RECIPIENT_TYPES,
   type DeliveryStatus,
   type NotificationChannel,
   type RecipientType,
