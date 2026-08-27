@@ -34,19 +34,37 @@ export const resolveRecipients = async (
 ): Promise<ResolvedRecipient[]> => {
   const userIds = recipients.filter((r) => r.type === 'USER').map((r) => r.value);
   const roles = recipients.filter((r) => r.type === 'ROLE').map((r) => r.value as UserRole);
+  const emails = recipients
+    .filter((r) => r.type === 'EMAIL')
+    .map((r) => r.value.toLowerCase());
 
-  const [usersById, usersByRole] = await Promise.all([
+  const [usersById, usersByRole, usersByEmail] = await Promise.all([
     userIds.length ? UserModel.find({ _id: { $in: userIds } }).lean() : Promise.resolve([]),
     roles.length ? UserModel.find({ role: { $in: roles } }).lean() : Promise.resolve([]),
+    emails.length ? UserModel.find({ email: { $in: emails } }).lean() : Promise.resolve([]),
   ]);
 
   const resolved: ResolvedRecipient[] = [];
 
   for (const recipient of recipients) {
     switch (recipient.type) {
-      case 'EMAIL':
-        resolved.push({ type: 'EMAIL', value: recipient.value });
+      case 'EMAIL': {
+        // If the address belongs to a registered account, attach the user id so
+        // the recipient also has an in-app inbox. Without this, addressing
+        // someone by email silently drops their in-app notification.
+        const account = usersByEmail.find(
+          (candidate) => candidate.email === recipient.value.toLowerCase(),
+        );
+
+        resolved.push({
+          type: 'EMAIL',
+          value: recipient.value,
+          ...(account
+            ? { userId: String(account._id), displayName: account.name }
+            : {}),
+        });
         break;
+      }
 
       case 'USER': {
         const user = usersById.find((candidate) => String(candidate._id) === recipient.value);

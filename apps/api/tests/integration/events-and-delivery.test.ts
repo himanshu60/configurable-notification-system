@@ -347,3 +347,54 @@ describe('notification history and inbox', () => {
       .expect(409);
   });
 });
+
+describe('email recipients that belong to an account', () => {
+  it('also receives the in-app notification', async () => {
+    const account = await registerUser({ email: 'ops.person@example.com' });
+
+    await api()
+      .post('/api/v1/rules')
+      .set(auth(token))
+      .send(
+        ruleFixture({
+          recipients: [{ type: 'EMAIL', value: 'ops.person@example.com' }],
+          channels: ['EMAIL', 'IN_APP'],
+        }),
+      )
+      .expect(201);
+
+    const response = await ingest({
+      eventId: 'evt-email-account',
+      type: 'order.created',
+      payload: orderPayload(15_000),
+    }).expect(201);
+
+    // Both channels, because the address resolved to a real inbox.
+    expect(response.body.data.deliveriesCreated).toBe(2);
+
+    const inApp = await DeliveryModel.findOne({ channel: 'IN_APP' });
+    expect(String(inApp?.recipient.userId)).toBe(account.user.id);
+  });
+
+  it('still queues email only for an address with no account', async () => {
+    await api()
+      .post('/api/v1/rules')
+      .set(auth(token))
+      .send(
+        ruleFixture({
+          recipients: [{ type: 'EMAIL', value: 'nobody@example.com' }],
+          channels: ['EMAIL', 'IN_APP'],
+        }),
+      )
+      .expect(201);
+
+    const response = await ingest({
+      eventId: 'evt-email-stranger',
+      type: 'order.created',
+      payload: orderPayload(15_000),
+    }).expect(201);
+
+    expect(response.body.data.deliveriesCreated).toBe(1);
+    expect(await DeliveryModel.countDocuments({ channel: 'IN_APP' })).toBe(0);
+  });
+});
