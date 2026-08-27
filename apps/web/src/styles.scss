@@ -23,13 +23,32 @@ html {
     )
   );
 
-  // Surfaces are deliberately a touch cooler and lighter than the M3 defaults,
-  // which read grey and flat on a dense admin screen.
-  --app-page-bg: #f6f7fb;
+  /**
+   * M3 tints every neutral with the primary hue, which puts a lavender cast on
+   * every card and chip and reads as an unfinished Material demo. Accent colour
+   * stays violet; the greys are pulled back to true neutrals.
+   */
+  --mat-sys-surface: #ffffff;
+  --mat-sys-surface-dim: #e6e8ee;
+  --mat-sys-surface-bright: #ffffff;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #fafbfc;
+  --mat-sys-surface-container: #f3f4f7;
+  --mat-sys-surface-container-high: #edeef2;
+  --mat-sys-surface-container-highest: #e6e8ee;
+  --mat-sys-surface-variant: #eceef3;
+  --mat-sys-on-surface: #16181d;
+  --mat-sys-on-surface-variant: #5b6070;
+  --mat-sys-outline: #8b91a1;
+  --mat-sys-outline-variant: #dfe2e9;
+  --mat-sys-background: #f5f6fa;
+  --mat-sys-on-background: #16181d;
+
+  --app-page-bg: #f5f6fa;
   --app-elevated: #ffffff;
-  --app-ring: rgba(15, 23, 42, 0.08);
-  --app-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.12);
-  --app-shadow-hover: 0 1px 2px rgba(15, 23, 42, 0.05), 0 16px 36px -16px rgba(15, 23, 42, 0.22);
+  --app-ring: rgb(15 23 42 / 9%);
+  --app-shadow: 0 1px 2px rgb(15 23 42 / 4%), 0 8px 24px -12px rgb(15 23 42 / 12%);
+  --app-shadow-hover: 0 1px 2px rgb(15 23 42 / 5%), 0 16px 36px -16px rgb(15 23 42 / 22%);
 }
 
 html.dark {
@@ -45,11 +64,28 @@ html.dark {
     )
   );
 
+  // Same neutralisation for the dark scheme.
+  --mat-sys-surface: #0f1117;
+  --mat-sys-surface-dim: #0b0d13;
+  --mat-sys-surface-bright: #262b38;
+  --mat-sys-surface-container-lowest: #0a0c11;
+  --mat-sys-surface-container-low: #14161f;
+  --mat-sys-surface-container: #191c26;
+  --mat-sys-surface-container-high: #1f232e;
+  --mat-sys-surface-container-highest: #262b38;
+  --mat-sys-surface-variant: #262b38;
+  --mat-sys-on-surface: #e7e9ef;
+  --mat-sys-on-surface-variant: #a3a9b9;
+  --mat-sys-outline: #6c7382;
+  --mat-sys-outline-variant: #2b3040;
+  --mat-sys-background: #0b0d14;
+  --mat-sys-on-background: #e7e9ef;
+
   --app-page-bg: #0b0d14;
   --app-elevated: #14161f;
-  --app-ring: rgba(255, 255, 255, 0.08);
-  --app-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
-  --app-shadow-hover: 0 1px 2px rgba(0, 0, 0, 0.5), 0 16px 36px -16px rgba(0, 0, 0, 0.8);
+  --app-ring: rgb(255 255 255 / 9%);
+  --app-shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 60%);
+  --app-shadow-hover: 0 1px 2px rgb(0 0 0 / 50%), 0 16px 36px -16px rgb(0 0 0 / 80%);
 }
 
 * {
@@ -72,11 +108,21 @@ body {
 }
 
 /**
- * Material Symbols renders as its ligature text until the font is applied.
- * mat-icon gets `material-symbols-outlined` from MAT_ICON_DEFAULT_OPTIONS; this
- * gives that class the font, a consistent optical size, and the variable-font
- * axes that keep icons from looking heavy next to 14px text.
+ * The icon font is served from our own origin rather than a CDN.
+ *
+ * These are ligature icons: if the font fails to arrive, every `<mat-icon>menu`
+ * renders the literal word "menu". Depending on a third-party host for that
+ * means one blocked domain turns the entire UI into scattered text, which is
+ * exactly what happens on a locked-down corporate network.
  */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/material-symbols.woff2') format('woff2');
+}
+
 .material-symbols-outlined,
 mat-icon.material-symbols-outlined {
   font-family: 'Material Symbols Outlined', sans-serif;
@@ -90,13 +136,8 @@ mat-icon.material-symbols-outlined {
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
-  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24;
 }
 
 // mat-icon reserves 24px; keep the glyph centred inside it at our 20px size.
@@ -107,7 +148,22 @@ mat-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  overflow: visible;
+  overflow: hidden;
+}
+
+/**
+ * Ligature icons render as their literal text ("menu", "search") until the font
+ * arrives. On a slow connection, or if Google Fonts is unreachable entirely,
+ * that turns the whole UI into scattered words. Icons stay transparent until
+ * `document.fonts.ready` resolves, so the layout is stable and the fallback is
+ * empty space rather than garbled text.
+ */
+.material-symbols-outlined {
+  color: transparent;
+}
+
+html.icons-ready .material-symbols-outlined {
+  color: inherit;
 }
 
 // ---------------------------------------------------------------------------
