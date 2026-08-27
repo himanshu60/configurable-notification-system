@@ -307,3 +307,18 @@ describe('dry run and the real run agree', () => {
     expect(response.body.data.preview[0].channel).toBe('EMAIL');
   });
 });
+
+
+describe('service index', () => {
+  it('identifies the service at the root instead of returning 404', async () => {
+    const response = await api().get('/').expect(200);
+
+    expect(response.body.status).toBe('ok');
+    expect(response.body.endpoints.api).toBe('/api/v1');
+  });
+
+  it('still 404s an unknown route with the standard error envelope', async () => {
+    const response = await api().get('/nope').expect(404);
+    expect(response.body.error.code).toBe('NOT_FOUND');
+  });
+});

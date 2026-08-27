@@ -5,6 +5,25 @@ export const healthRouter: Router = Router();
 
 const startedAt = Date.now();
 
+/**
+ * Service index. Without this a bare `/` returns a 404, which reads as a broken
+ * deployment to anyone who opens the URL and fills the log with red lines when
+ * a platform health check probes the root.
+ */
+healthRouter.get('/', (_req, res) => {
+  res.json({
+    service: 'Configurable Notification System API',
+    status: 'ok',
+    version: 'v1',
+    docs: 'https://github.com/himanshu60/configurable-notification-system#api-reference',
+    endpoints: {
+      health: '/health',
+      readiness: '/health/ready',
+      api: '/api/v1',
+    },
+  });
+});
+
 /** Liveness: the process is up. Deliberately does not touch dependencies. */
 healthRouter.get('/health', (_req, res) => {
   res.json({
