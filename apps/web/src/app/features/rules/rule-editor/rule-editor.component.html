@@ -1,0 +1,273 @@
+<div class="page">
+  <cns-page-header
+    [title]="isEdit() ? 'Edit rule' : 'New rule'"
+    subtitle="Pick a trigger, narrow it with conditions, then choose who is told and how."
+  >
+    <button matButton (click)="cancel()">Cancel</button>
+    <button matButton="filled" (click)="save()" [disabled]="saving()">
+      <mat-icon>save</mat-icon>
+      {{ isEdit() ? 'Save changes' : 'Create rule' }}
+    </button>
+  </cns-page-header>
+
+  @if (saving()) {
+    <mat-progress-bar mode="indeterminate" class="loader" />
+  }
+
+  <form [formGroup]="form" class="editor">
+    <div class="main-column">
+      <mat-card appearance="outlined" class="section">
+        <h2>Basics</h2>
+
+        <div class="grid-2">
+          <mat-form-field>
+            <mat-label>Rule name</mat-label>
+            <input matInput formControlName="name" placeholder="High value orders" />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <mat-error>Give the rule a name of at least 3 characters</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Trigger</mat-label>
+            <mat-select formControlName="eventType" (valueChange)="onEventTypeChanged()">
+              @for (event of catalog.catalog()?.events ?? []; track event.type) {
+                <mat-option [value]="event.type">
+                  {{ event.label }}
+                  <span class="option-path">{{ event.type }}</span>
+                </mat-option>
+              }
+            </mat-select>
+            @if (form.controls.eventType.touched && form.controls.eventType.invalid) {
+              <mat-error>Choose the event this rule listens for</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field>
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            rows="2"
+            formControlName="description"
+            placeholder="What is this rule for?"
+          ></textarea>
+        </mat-form-field>
+
+        <mat-slide-toggle formControlName="enabled">
+          Rule is enabled
+          <span class="text-muted toggle-hint">Disabled rules are skipped during matching</span>
+        </mat-slide-toggle>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="section">
+        @if (form.controls.eventType.value) {
+          <cns-condition-builder
+            [group]="conditionsGroup"
+            [eventType]="form.controls.eventType.value"
+          />
+        } @else {
+          <p class="text-muted">Choose a trigger above to start adding conditions.</p>
+        }
+      </mat-card>
+
+      <mat-card appearance="outlined" class="section">
+        <h2>Recipients</h2>
+        <p class="text-muted section-hint">
+          A role fans out to every user holding it, so the rule keeps working as the team changes.
+        </p>
+
+        <div class="recipients" formArrayName="recipients">
+          @for (recipient of recipients.controls; track $index; let i = $index) {
+            <div class="recipient-row" [formGroupName]="i">
+              <mat-form-field class="recipient-type" subscriptSizing="dynamic">
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="type">
+                  <mat-option value="EMAIL">Email address</mat-option>
+                  <mat-option value="ROLE">Role</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              @if (recipient.controls.type.value === 'ROLE') {
+                <mat-form-field subscriptSizing="dynamic">
+                  <mat-label>Role</mat-label>
+                  <mat-select formControlName="value">
+                    <mat-option value="ADMIN">Admins</mat-option>
+                    <mat-option value="USER">Users</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              } @else {
+                <mat-form-field subscriptSizing="dynamic">
+                  <mat-label>Email address</mat-label>
+                  <input matInput type="email" formControlName="value" placeholder="ops@example.com" />
+                </mat-form-field>
+              }
+
+              <button
+                matIconButton
+                type="button"
+                (click)="removeRecipient(i)"
+                [disabled]="recipients.length === 1"
+                matTooltip="Remove recipient"
+                [attr.aria-label]="'Remove recipient ' + (i + 1)"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+
+        <button matButton type="button" (click)="addRecipient()">
+          <mat-icon>person_add</mat-icon>
+          Add recipient
+        </button>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="section">
+        <h2>Message</h2>
+
+        <mat-form-field>
+          <mat-label>Subject</mat-label>
+          <input
+            matInput
+            formControlName="subject"
+            [formControl]="form.controls.template.controls.subject"
+            placeholder="Order {{ '{{order.id}}' }} is large"
+          />
+          @if (
+            form.controls.template.controls.subject.touched &&
+            form.controls.template.controls.subject.invalid
+          ) {
+            <mat-error>A subject is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Body</mat-label>
+          <textarea
+            matInput
+            rows="6"
+            [formControl]="form.controls.template.controls.body"
+          ></textarea>
+          <mat-hint>
+            Insert values with {{ '{{path}}' }}, optionally formatted:
+            {{ '{{order.value | currency}}' }}
+          </mat-hint>
+          @if (
+            form.controls.template.controls.body.touched &&
+            form.controls.template.controls.body.invalid
+          ) {
+            <mat-error>A message body is required</mat-error>
+          }
+        </mat-form-field>
+
+        @if (availableFields.length > 0) {
+          <div class="tokens">
+            <span class="text-muted">Available fields:</span>
+            <mat-chip-set>
+              @for (field of availableFields; track field.path) {
+                <mat-chip
+                  disableRipple
+                  class="token-chip"
+                  (click)="insertToken(field.path)"
+                  [matTooltip]="'Insert ' + field.path"
+                >
+                  {{ field.label }}
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+      </mat-card>
+    </div>
+
+    <aside class="side-column">
+      <mat-card appearance="outlined" class="section">
+        <h2>Delivery</h2>
+
+        <mat-form-field>
+          <mat-label>Channels</mat-label>
+          <mat-select formControlName="channels" multiple>
+            @for (channel of channels; track channel) {
+              <mat-option [value]="channel">{{ channelLabels[channel] }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.channels.touched && form.controls.channels.invalid) {
+            <mat-error>Select at least one channel</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Priority</mat-label>
+          <input matInput type="number" formControlName="priority" min="0" max="100" />
+          <mat-hint>Lower runs first when several rules match</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Deduplication window</mat-label>
+          <input matInput type="number" formControlName="dedupeWindowSec" min="0" max="86400" />
+          <span matTextSuffix>&nbsp;seconds</span>
+          <mat-hint>0 dedupes per event only; above 0 collapses repeats in the window</mat-hint>
+        </mat-form-field>
+      </mat-card>
+
+      <mat-card appearance="outlined" class="section">
+        <h2>Test this rule</h2>
+        <p class="text-muted section-hint">
+          Evaluates the conditions and renders the message. Nothing is stored or sent.
+        </p>
+
+        <mat-form-field>
+          <mat-label>Sample payload (JSON)</mat-label>
+          <textarea
+            matInput
+            rows="10"
+            class="mono"
+            [value]="payloadDraft()"
+            (input)="payloadDraft.set($any($event.target).value)"
+          ></textarea>
+        </mat-form-field>
+
+        <button matButton="tonal" type="button" (click)="runTest()" [disabled]="testing()">
+          <mat-icon>play_arrow</mat-icon>
+          Run dry run
+        </button>
+
+        @if (testResult(); as result) {
+          <div class="result" [class.matched]="result.matched">
+            <div class="result-head">
+              <mat-icon>{{ result.matched ? 'check_circle' : 'cancel' }}</mat-icon>
+              <strong>{{ result.matched ? 'This rule matches' : 'This rule does not match' }}</strong>
+            </div>
+
+            @if (result.evaluations.length > 0) {
+              <ul class="evaluations">
+                @for (evaluation of result.evaluations; track $index) {
+                  <li [class.failed]="!evaluation.passed">
+                    <mat-icon>{{ evaluation.passed ? 'done' : 'close' }}</mat-icon>
+                    <span class="mono">
+                      {{ evaluation.field }} {{ evaluation.operator }}
+                      {{ evaluation.expected }}
+                    </span>
+                    <span class="text-muted">got {{ evaluation.actual }}</span>
+                  </li>
+                }
+              </ul>
+            }
+
+            @for (preview of result.preview; track $index) {
+              <div class="preview">
+                <div class="preview-head">
+                  <mat-icon>{{ preview.channel === 'EMAIL' ? 'mail' : 'notifications' }}</mat-icon>
+                  <span>{{ preview.recipient }}</span>
+                </div>
+                <strong>{{ preview.subject }}</strong>
+                <pre>{{ preview.body }}</pre>
+              </div>
+            }
+          </div>
+        }
+      </mat-card>
+    </aside>
+  </form>
+</div>

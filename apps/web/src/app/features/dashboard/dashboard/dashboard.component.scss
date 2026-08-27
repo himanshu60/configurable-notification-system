@@ -1,0 +1,170 @@
+@use '../../../../styles/tokens' as *;
+
+.loader {
+  margin-bottom: $space-3;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: $space-4;
+  margin-bottom: $space-4;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  padding: $space-4;
+
+  &.alert {
+    border-color: color-mix(in srgb, var(--mat-sys-error) 45%, transparent);
+  }
+}
+
+.tile-label {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tile-value {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.tile-foot {
+  font-size: 0.78rem;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: $space-4;
+  align-items: start;
+}
+
+.panel {
+  padding: $space-4;
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.channel-row {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.channel-name {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: 0.88rem;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.bar {
+  display: flex;
+  height: 8px;
+  border-radius: $radius-pill;
+  overflow: hidden;
+  background: var(--mat-sys-surface-container-high);
+}
+
+.seg {
+  &.sent {
+    background: #16a34a;
+  }
+
+  &.pending {
+    background: #d97706;
+  }
+
+  &.failed {
+    background: #dc2626;
+  }
+
+  &.empty {
+    background: transparent;
+  }
+}
+
+.channel-counts {
+  font-size: 0.76rem;
+}
+
+.activity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-3 0;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+}
+
+.activity-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+
+  span {
+    font-size: 0.76rem;
+  }
+}
+
+.time {
+  font-size: 0.76rem;
+}
+
+@media (max-width: $breakpoint-md) {
+  .panels {
+    grid-template-columns: 1fr;
+  }
+
+  .activity li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .activity .time {
+    display: none;
+  }
+}

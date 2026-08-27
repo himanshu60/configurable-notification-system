@@ -1,0 +1,199 @@
+<mat-sidenav-container class="history-shell">
+  <mat-sidenav-content>
+    <div class="page">
+      <cns-page-header
+        title="Notification history"
+        subtitle="Every notification your rules produced, with its recipient, channel, status and time."
+      >
+        <button matButton (click)="reload()">
+          <mat-icon>refresh</mat-icon>
+          Refresh
+        </button>
+      </cns-page-header>
+
+      <div class="filters surface-card">
+        <mat-form-field class="search" subscriptSizing="dynamic">
+          <mat-label>Search</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [formControl]="searchControl" placeholder="Subject, rule or event id" />
+        </mat-form-field>
+
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label>Channel</mat-label>
+          <mat-select
+            [value]="channelFilter()"
+            (valueChange)="channelFilter.set($event); onFilterChanged()"
+          >
+            <mat-option value="">All channels</mat-option>
+            @for (channel of channels; track channel) {
+              <mat-option [value]="channel">{{ channelLabels[channel] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label>Status</mat-label>
+          <mat-select
+            [value]="statusFilter()"
+            (valueChange)="statusFilter.set($event); onFilterChanged()"
+          >
+            <mat-option value="">Any status</mat-option>
+            @for (status of statuses; track status) {
+              <mat-option [value]="status">{{ status }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        @if (hasFilters()) {
+          <button matButton (click)="clearFilters()">
+            <mat-icon>filter_alt_off</mat-icon>
+            Clear
+          </button>
+        }
+      </div>
+
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" class="loader" />
+      }
+
+      @if (!loading() && rows().length === 0) {
+        <div class="surface-card">
+          <cns-empty-state
+            icon="history"
+            [title]="hasFilters() ? 'Nothing matches those filters' : 'No notifications yet'"
+            [message]="
+              hasFilters()
+                ? 'Try widening the filters.'
+                : 'Fire an event from the simulator and any matching rule will show up here.'
+            "
+          />
+        </div>
+      } @else {
+        <div class="surface-card table-scroll">
+          <table mat-table [dataSource]="rows()" class="history-table">
+            <ng-container matColumnDef="notification">
+              <th mat-header-cell *matHeaderCellDef>Notification</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="subject">{{ row.subject }}</div>
+                <div class="text-muted rule-name">{{ row.ruleName }}</div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="recipient">
+              <th mat-header-cell *matHeaderCellDef>Recipient</th>
+              <td mat-cell *matCellDef="let row">{{ row.recipient.value }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="channel">
+              <th mat-header-cell *matHeaderCellDef>Channel</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="channel">
+                  <mat-icon>{{ row.channel === 'EMAIL' ? 'mail' : 'notifications' }}</mat-icon>
+                  {{ channelLabel(row.channel) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let row">
+                <cns-status-chip [status]="row.status" />
+                @if (row.attempts > 1) {
+                  <span class="attempts text-muted">{{ row.attempts }} attempts</span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="timestamp">
+              <th mat-header-cell *matHeaderCellDef>Timestamp</th>
+              <td mat-cell *matCellDef="let row">
+                <span [matTooltip]="row.createdAt">{{ row.createdAt | date: 'MMM d, HH:mm' }}</span>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: columns"
+              class="clickable"
+              tabindex="0"
+              (click)="open(row)"
+              (keydown.enter)="open(row)"
+            ></tr>
+          </table>
+        </div>
+
+        <mat-paginator
+          [length]="total()"
+          [pageIndex]="pageIndex()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="[20, 50, 100]"
+          (page)="onPage($event)"
+          showFirstLastButtons
+        />
+      }
+    </div>
+  </mat-sidenav-content>
+
+  <mat-sidenav position="end" mode="over" [opened]="selected() !== null" (closedStart)="close()">
+    @if (selected(); as row) {
+      <div class="detail">
+        <header>
+          <h2>Delivery detail</h2>
+          <button matIconButton (click)="close()" aria-label="Close detail">
+            <mat-icon>close</mat-icon>
+          </button>
+        </header>
+
+        <cns-status-chip [status]="row.status" />
+
+        <dl>
+          <dt>Rule</dt>
+          <dd>{{ row.ruleName }}</dd>
+          <dt>Event</dt>
+          <dd class="mono">{{ row.eventType }} · {{ row.eventId }}</dd>
+          <dt>Recipient</dt>
+          <dd>{{ row.recipient.value }} ({{ row.recipient.type }})</dd>
+          <dt>Channel</dt>
+          <dd>{{ channelLabel(row.channel) }}</dd>
+          <dt>Attempts</dt>
+          <dd>{{ row.attempts }} of {{ row.maxAttempts }}</dd>
+          <dt>Created</dt>
+          <dd>{{ row.createdAt | date: 'medium' }}</dd>
+          @if (row.sentAt) {
+            <dt>Sent</dt>
+            <dd>{{ row.sentAt | date: 'medium' }}</dd>
+          }
+          @if (row.nextAttemptAt && row.status === 'FAILED') {
+            <dt>Next retry</dt>
+            <dd>{{ row.nextAttemptAt | date: 'medium' }}</dd>
+          }
+          @if (row.providerMessageId) {
+            <dt>Provider id</dt>
+            <dd class="mono">{{ row.providerMessageId }}</dd>
+          }
+        </dl>
+
+        @if (row.lastError) {
+          <div class="error-box">
+            <mat-icon>error</mat-icon>
+            <span>{{ row.lastError }}</span>
+          </div>
+        }
+
+        <section class="message">
+          <h3>Message</h3>
+          <strong>{{ row.subject }}</strong>
+          <pre>{{ row.body }}</pre>
+        </section>
+
+        @if (row.status === 'DEAD_LETTER' || row.status === 'FAILED') {
+          <button matButton="filled" (click)="retry(row)">
+            <mat-icon>replay</mat-icon>
+            Retry delivery
+          </button>
+        }
+      </div>
+    }
+  </mat-sidenav>
+</mat-sidenav-container>

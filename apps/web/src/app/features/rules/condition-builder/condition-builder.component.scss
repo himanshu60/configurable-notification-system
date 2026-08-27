@@ -1,0 +1,104 @@
+@use '../../../../styles/tokens' as *;
+
+.builder {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.builder-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $space-4;
+  flex-wrap: wrap;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: $space-1 0 0;
+    font-size: 0.85rem;
+    max-width: 56ch;
+  }
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.condition-row {
+  display: grid;
+  grid-template-columns: 52px minmax(160px, 1.2fr) minmax(150px, 1fr) minmax(160px, 1.1fr) 40px;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-3;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: $radius-md;
+  background: var(--mat-sys-surface-container-lowest);
+}
+
+.joiner {
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: right;
+  text-transform: lowercase;
+}
+
+.range {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-2;
+}
+
+.value-placeholder {
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.option-path {
+  display: block;
+  font-family: $font-mono;
+  font-size: 0.68rem;
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.2;
+}
+
+.remove {
+  justify-self: center;
+}
+
+@media (max-width: $breakpoint-md) {
+  .condition-row {
+    grid-template-columns: 1fr 40px;
+    grid-template-areas:
+      'joiner remove'
+      'field field'
+      'operator operator'
+      'value value';
+  }
+
+  .joiner {
+    grid-area: joiner;
+    text-align: left;
+  }
+  .field {
+    grid-area: field;
+  }
+  .operator {
+    grid-area: operator;
+  }
+  .value,
+  .range,
+  .value-placeholder {
+    grid-area: value;
+  }
+  .remove {
+    grid-area: remove;
+  }
+}

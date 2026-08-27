@@ -1,0 +1,163 @@
+<div class="page">
+  <cns-page-header
+    title="Event simulator"
+    subtitle="Fire a real event through the ingestion endpoint and watch which rules pick it up."
+  >
+    <a matButton routerLink="/history">
+      <mat-icon>history</mat-icon>
+      View history
+    </a>
+  </cns-page-header>
+
+  <div class="layout">
+    <mat-card appearance="outlined" class="section">
+      <h2>Compose an event</h2>
+
+      @if (sending()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      <form [formGroup]="form" (ngSubmit)="fire()" class="stack">
+        <mat-form-field>
+          <mat-label>Event type</mat-label>
+          <mat-select formControlName="type" (valueChange)="onTypeChanged()">
+            @for (event of catalog.catalog()?.events ?? []; track event.type) {
+              <mat-option [value]="event.type">
+                {{ event.label }}
+                <span class="option-path">{{ event.type }}</span>
+              </mat-option>
+            }
+          </mat-select>
+          @if (form.controls.type.touched && form.controls.type.invalid) {
+            <mat-error>Choose an event type</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Event id (idempotency key)</mat-label>
+          <input matInput formControlName="eventId" class="mono" />
+          <button
+            matIconButton
+            matSuffix
+            type="button"
+            (click)="regenerateId()"
+            matTooltip="Generate a new id"
+            aria-label="Generate a new event id"
+          >
+            <mat-icon>refresh</mat-icon>
+          </button>
+          <mat-hint>Send the same id twice and the second one is rejected as a duplicate</mat-hint>
+          @if (form.controls.eventId.invalid) {
+            <mat-error>At least 6 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Payload (JSON)</mat-label>
+          <textarea matInput rows="14" class="mono" formControlName="payload"></textarea>
+        </mat-form-field>
+
+        <div class="row">
+          <button matButton="filled" type="submit" [disabled]="sending()">
+            <mat-icon>bolt</mat-icon>
+            Fire event
+          </button>
+          @if (lastResult()) {
+            <button
+              matButton
+              type="button"
+              (click)="fireAgain()"
+              [disabled]="sending()"
+              matTooltip="Send the identical event id again to prove it is not processed twice"
+            >
+              <mat-icon>replay</mat-icon>
+              Send duplicate
+            </button>
+          }
+        </div>
+      </form>
+    </mat-card>
+
+    <div class="side">
+      @if (lastResult(); as result) {
+        <mat-card appearance="outlined" class="section result" [class.duplicate]="result.duplicate">
+          <div class="result-head">
+            <mat-icon>{{ result.duplicate ? 'content_copy' : 'check_circle' }}</mat-icon>
+            <h2>{{ result.duplicate ? 'Duplicate ignored' : 'Event accepted' }}</h2>
+          </div>
+
+          @if (result.duplicate) {
+            <p class="text-muted">
+              This event id had already been accepted, so no rules were re-evaluated and no
+              notifications were created.
+            </p>
+          } @else {
+            <dl class="metrics">
+              <div>
+                <dt>Rules matched</dt>
+                <dd>{{ result.matchedRules.length }}</dd>
+              </div>
+              <div>
+                <dt>Notifications queued</dt>
+                <dd>{{ result.deliveriesCreated }}</dd>
+              </div>
+              <div>
+                <dt>Suppressed as duplicates</dt>
+                <dd>{{ result.deliveriesSuppressed }}</dd>
+              </div>
+            </dl>
+
+            @if (result.matchedRules.length > 0) {
+              <mat-chip-set>
+                @for (rule of result.matchedRules; track rule.id) {
+                  <mat-chip disableRipple>{{ rule.name }}</mat-chip>
+                }
+              </mat-chip-set>
+            } @else {
+              <p class="text-muted">
+                No enabled rule matched this payload. Check the conditions on your rules.
+              </p>
+            }
+          }
+        </mat-card>
+      }
+
+      <mat-card appearance="outlined" class="section">
+        <div class="row">
+          <h2>Recent events</h2>
+          <span class="spacer"></span>
+          <button matIconButton (click)="refreshLog()" matTooltip="Refresh" aria-label="Refresh log">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+
+        @if (log().length === 0 && !loadingLog()) {
+          <cns-empty-state
+            icon="bolt"
+            title="No events yet"
+            message="Fire one from the form to see it here."
+          />
+        } @else {
+          <ul class="log">
+            @for (event of log(); track event.id) {
+              <li>
+                <div class="log-top">
+                  <strong>{{ event.type }}</strong>
+                  <span class="text-muted">{{ event.receivedAt | date: 'shortTime' }}</span>
+                </div>
+                <div class="log-meta text-muted mono">{{ event.eventId }}</div>
+                <div class="log-meta">
+                  {{ event.matchedRuleIds.length }} matched ·
+                  {{ event.deliveryCount }} queued
+                  @if (event.suppressedCount > 0) {
+                    · {{ event.suppressedCount }} suppressed
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </mat-card>
+    </div>
+  </div>
+</div>
